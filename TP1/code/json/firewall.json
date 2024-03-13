@@ -177,7 +177,7 @@
       "name" : "deparser",
       "id" : 0,
       "source_info" : {
-        "filename" : "p4/tut-simple-router.p4",
+        "filename" : "p4/firewall.p4",
         "line" : 251,
         "column" : 8,
         "source_fragment" : "MyDeparser"
@@ -194,7 +194,7 @@
       "name" : "calc",
       "id" : 0,
       "source_info" : {
-        "filename" : "p4/tut-simple-router.p4",
+        "filename" : "p4/firewall.p4",
         "line" : 229,
         "column" : 1,
         "source_fragment" : "update_checksum( ..."
@@ -270,7 +270,7 @@
             }
           ],
           "source_info" : {
-            "filename" : "p4/tut-simple-router.p4",
+            "filename" : "p4/firewall.p4",
             "line" : 147,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
@@ -292,7 +292,7 @@
             }
           ],
           "source_info" : {
-            "filename" : "p4/tut-simple-router.p4",
+            "filename" : "p4/firewall.p4",
             "line" : 147,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
@@ -314,7 +314,7 @@
             }
           ],
           "source_info" : {
-            "filename" : "p4/tut-simple-router.p4",
+            "filename" : "p4/firewall.p4",
             "line" : 147,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
@@ -349,7 +349,7 @@
             }
           ],
           "source_info" : {
-            "filename" : "p4/tut-simple-router.p4",
+            "filename" : "p4/firewall.p4",
             "line" : 156,
             "column" : 8,
             "source_fragment" : "meta.next_hop_ipv4 = nxt_hop"
@@ -368,7 +368,7 @@
             }
           ],
           "source_info" : {
-            "filename" : "p4/tut-simple-router.p4",
+            "filename" : "p4/firewall.p4",
             "line" : 157,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = port"
@@ -410,7 +410,7 @@
             }
           ],
           "source_info" : {
-            "filename" : "p4/tut-simple-router.p4",
+            "filename" : "p4/firewall.p4",
             "line" : 158,
             "column" : 8,
             "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
@@ -441,7 +441,7 @@
             }
           ],
           "source_info" : {
-            "filename" : "p4/tut-simple-router.p4",
+            "filename" : "p4/firewall.p4",
             "line" : 173,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.srcAddr = src_mac"
@@ -472,7 +472,7 @@
             }
           ],
           "source_info" : {
-            "filename" : "p4/tut-simple-router.p4",
+            "filename" : "p4/firewall.p4",
             "line" : 186,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.dstAddr = dst_mac"
@@ -486,7 +486,7 @@
       "name" : "ingress",
       "id" : 0,
       "source_info" : {
-        "filename" : "p4/tut-simple-router.p4",
+        "filename" : "p4/firewall.p4",
         "line" : 143,
         "column" : 8,
         "source_fragment" : "MyIngress"
@@ -497,7 +497,7 @@
           "name" : "MyIngress.ipv4_lpm",
           "id" : 0,
           "source_info" : {
-            "filename" : "p4/tut-simple-router.p4",
+            "filename" : "p4/firewall.p4",
             "line" : 162,
             "column" : 10,
             "source_fragment" : "ipv4_lpm"
@@ -535,7 +535,7 @@
           "name" : "MyIngress.src_mac",
           "id" : 1,
           "source_info" : {
-            "filename" : "p4/tut-simple-router.p4",
+            "filename" : "p4/firewall.p4",
             "line" : 176,
             "column" : 10,
             "source_fragment" : "src_mac"
@@ -572,7 +572,7 @@
           "name" : "MyIngress.dst_mac",
           "id" : 2,
           "source_info" : {
-            "filename" : "p4/tut-simple-router.p4",
+            "filename" : "p4/firewall.p4",
             "line" : 189,
             "column" : 10,
             "source_fragment" : "dst_mac"
@@ -612,7 +612,7 @@
           "name" : "node_2",
           "id" : 0,
           "source_info" : {
-            "filename" : "p4/tut-simple-router.p4",
+            "filename" : "p4/firewall.p4",
             "line" : 204,
             "column" : 12,
             "source_fragment" : "hdr.ipv4.isValid()"
@@ -637,7 +637,7 @@
       "name" : "egress",
       "id" : 1,
       "source_info" : {
-        "filename" : "p4/tut-simple-router.p4",
+        "filename" : "p4/firewall.p4",
         "line" : 216,
         "column" : 8,
         "source_fragment" : "MyEgress"
@@ -653,7 +653,7 @@
       "name" : "cksum",
       "id" : 0,
       "source_info" : {
-        "filename" : "p4/tut-simple-router.p4",
+        "filename" : "p4/firewall.p4",
         "line" : 229,
         "column" : 1,
         "source_fragment" : "update_checksum( ..."
@@ -716,7 +716,7 @@
       ["standard_metadata", "priority"]
     ]
   ],
-  "program" : "p4/tut-simple-router.p4",
+  "program" : "p4/firewall.p4",
   "__meta__" : {
     "version" : [2, 23],
     "compiler" : "https://github.com/p4lang/p4c"

@@ -119,26 +119,69 @@ class SingleSwitchTopo(Topo):
         
         # adding host and link with the right mac and ip addrs
         # declaring a link: addr2=sw_mac gives a mac to the switch port
+        
+        # LAN 1
         for h in range(0,3):
-            host = self.addHost('h%d' % (h + 1),
-                                ip = host_ip_base % (h + 1),
-                                mac = host_mac_base % (h + 1))
-            sw_mac = sw_mac_base % (h + 1)
-            self.addLink(host, s1, addr2=sw_mac)
-
+            if h == 0:
+                host = self.addHost('svr11',
+                                    ip = "10.0.1.10/24",
+                                    mac = host_mac_base % (h + 1))
+                sw_mac = sw_mac_base % (h + 1)
+                self.addLink(host, s1, addr2=sw_mac)
+            if h == 1:
+                host = self.addHost('svr12',
+                                    ip = "10.0.1.20/24",
+                                    mac = host_mac_base % (h + 1))
+                sw_mac = sw_mac_base % (h + 1)
+                self.addLink(host, s1, addr2=sw_mac)
+            if h == 2:
+                host = self.addHost('h11',
+                                    ip = "10.0.1.100/24",
+                                    mac = host_mac_base % (h + 1))
+                sw_mac = sw_mac_base % (h + 1)
+                self.addLink(host, s1, addr2=sw_mac)
+                
+        # LAN 2
         for h in range(3,6):
-            host = self.addHost('h%d' % (h + 1),
-                                ip = host_ip_base % (h + 1),
-                                mac = host_mac_base % (h + 1))
-            sw_mac = sw_mac_base % (h + 1)
-            self.addLink(host, s2, addr2=sw_mac)
+            if h == 3:
+                host = self.addHost('svr21',
+                                    ip = "10.0.2.10/24",
+                                    mac = host_mac_base % (h + 1))
+                sw_mac = sw_mac_base % (h + 1)
+                self.addLink(host, s2, addr2=sw_mac)
+            if h == 4:
+                host = self.addHost('svr22',
+                                    ip = "10.0.2.20/24",
+                                    mac = host_mac_base % (h + 1))
+                sw_mac = sw_mac_base % (h + 1)
+                self.addLink(host, s2, addr2=sw_mac)
+            if h == 5:
+                host = self.addHost('h21',
+                                    ip = "10.0.2.100/24",
+                                    mac = host_mac_base % (h + 1))
+                sw_mac = sw_mac_base % (h + 1)
+                self.addLink(host, s2, addr2=sw_mac)
 
+        # LAN 3
         for h in range(6,9):
-            host = self.addHost('h%d' % (h + 1),
-                                ip = host_ip_base % (h + 1),
-                                mac = host_mac_base % (h + 1))
-            sw_mac = sw_mac_base % (h + 1)
-            self.addLink(host, s3, addr2=sw_mac)
+            if h == 6:
+                host = self.addHost('svr31',
+                                    ip = "10.0.3.10/24",
+                                    mac = host_mac_base % (h + 1))
+                sw_mac = sw_mac_base % (h + 1)
+                self.addLink(host, s3, addr2=sw_mac)
+            if h == 7:
+                host = self.addHost('svr32',
+                                    ip = "10.0.3.20/24",
+                                    mac = host_mac_base % (h + 1))
+                sw_mac = sw_mac_base % (h + 1)
+                self.addLink(host, s3, addr2=sw_mac)
+            if h == 8:
+                host = self.addHost('h31',
+                                    ip = "10.0.3.100/24",
+                                    mac = host_mac_base % (h + 1))
+                sw_mac = sw_mac_base % (h + 1)
+                self.addLink(host, s3, addr2=sw_mac)
 
         #adicionar links entre switchs e routers
         self.addLink(s1, r1, addr2=sw_mac)
@@ -178,6 +221,7 @@ def main():
     # h.setDefaultRoute() sets the defaultRoute for the host
     # populating the arp table of the host with the switch ip and switch mac
     # avoids the need for arp request from the host
+    """
     for n in range(num_hosts):
         h = net.get('h%d' % (n + 1))
         h.setARP(sw_addr[n], sw_mac[n])
@@ -186,6 +230,17 @@ def main():
     for n in range(num_hosts):
         h = net.get('h%d' % (n + 1))
         h.describe()
+    """
+
+    hosts = [node for node in net.topo.hosts() if isinstance(node, net.host)]
+    for h in hosts:
+        hs = net.get(h.__name__)
+        hs.setARP(sw_addr[n], sw_mac[n])
+        hs.setDefaultRoute("dev eth0 via %s" % sw_addr[n])
+
+    for h in hosts:
+        hs = net.get(h.__name__)
+        hs.describe()
 
     sleep(1)  # time for the host and switch confs to take effect
 

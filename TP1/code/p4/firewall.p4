@@ -143,6 +143,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
+
     action drop() {
         mark_to_drop(standard_metadata);
     }
@@ -195,7 +196,20 @@ control MyIngress(inout headers hdr,
         default_action = drop;
     }
 
-    
+    /* ------------------------------------------------------ */
+    /* CODE FIREWALL LAN 1*/
+
+
+    action drop_LAN1() {
+        mark_to_drop(standard_metadata);
+    }
+
+    action accept_LAN1() {
+        // Se aceitar encaminha o pacote
+    }
+
+    /* ------------------------------------------------------ */  
+
     apply {
         /**
         * The conditions and order in which the software 
