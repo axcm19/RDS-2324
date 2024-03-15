@@ -90,32 +90,23 @@ class SingleSwitchTopo(Topo):
                             cls = P4Switch,
                             sw_path = sw_path,
                             json_path = json_path,
-                            thrift_port = thrift_port)
+                            thrift_port = thrift_port + 1)
 
         r3 = self.addSwitch('r3',
                             cls = P4Switch,
                             sw_path = sw_path,
                             json_path = json_path,
-                            thrift_port = thrift_port)
+                            thrift_port = thrift_port + 2)
 
         # adicionar os 3 switches OVS
         s1 = self.addSwitch('s1',
-                            cls = OVSSwitch,
-                            sw_path = sw_path,
-                            json_path = json_path,
-                            thrift_port = thrift_port)
+                            cls = OVSSwitch)
 
         s2 = self.addSwitch('s2',
-                            cls = OVSSwitch,
-                            sw_path = sw_path,
-                            json_path = json_path,
-                            thrift_port = thrift_port)
+                            cls = OVSSwitch)
 
         s3 = self.addSwitch('s3',
-                            cls = OVSSwitch,
-                            sw_path = sw_path,
-                            json_path = json_path,
-                            thrift_port = thrift_port)
+                            cls = OVSSwitch)
         
         # adding host and link with the right mac and ip addrs
         # declaring a link: addr2=sw_mac gives a mac to the switch port
@@ -126,6 +117,8 @@ class SingleSwitchTopo(Topo):
                 host = self.addHost('svr11',
                                     ip = "10.0.1.10/24",
                                     mac = host_mac_base % (h + 1))
+
+
                 sw_mac = sw_mac_base % (h + 1)
                 self.addLink(host, s1, addr2=sw_mac)
             if h == 1:

@@ -143,7 +143,6 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
-
     action drop() {
         mark_to_drop(standard_metadata);
     }
@@ -196,20 +195,18 @@ control MyIngress(inout headers hdr,
         default_action = drop;
     }
 
-    /* ------------------------------------------------------ */
-    /* CODE FIREWALL LAN 1*/
 
-
-    action drop_LAN1() {
-        mark_to_drop(standard_metadata);
+    table firewall {
+        key = { hdr.ipv4.dstAddr : lpm; }
+        actions = {
+        ipv4_fwd;
+        drop;
+        NoAction;
+        }
+        default_action = NoAction(); // NoAction is defined in v1model - does nothing
     }
 
-    action accept_LAN1() {
-        // Se aceitar encaminha o pacote
-    }
-
-    /* ------------------------------------------------------ */  
-
+    
     apply {
         /**
         * The conditions and order in which the software 
