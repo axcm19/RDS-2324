@@ -195,6 +195,26 @@ control MyIngress(inout headers hdr,
         default_action = drop;
     }
 
+    action acept_package(ip4Addr_t dest, egressSpec_t port) {
+        ipv4_fwd(dest, port);
+    }
+
+    /*
+    REGRAS DA FIREWALL
+    h1 só pode receber pacotes de h3
+    h2 recebe de todos
+    h3 só pode receber de h2
+    */
+    table firewall {
+        key = { hdr.ipv4.srcAddr : exact; hdr.ipv4.dstAddr : exact; }
+        actions = {
+        acept_package;
+        drop;
+        NoAction;
+        }
+        default_action = NoAction(); // NoAction is defined in v1model - does nothing
+    }
+
     
     apply {
         /**
@@ -202,9 +222,10 @@ control MyIngress(inout headers hdr,
         * switch must apply the tables. 
         */
         if (hdr.ipv4.isValid()) {
+            firewall.apply();
             ipv4_lpm.apply();
             src_mac.apply();
-            dst_mac.apply();
+            dst_mac.apply();  
         }
     }
 }

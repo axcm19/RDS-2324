@@ -178,7 +178,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/tut-simple-router.p4",
-        "line" : 251,
+        "line" : 272,
         "column" : 8,
         "source_fragment" : "MyDeparser"
       },
@@ -195,7 +195,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/tut-simple-router.p4",
-        "line" : 229,
+        "line" : 250,
         "column" : 1,
         "source_fragment" : "update_checksum( ..."
       },
@@ -257,26 +257,10 @@
       "primitives" : []
     },
     {
-      "name" : "MyIngress.drop",
+      "name" : "NoAction",
       "id" : 1,
       "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "mark_to_drop",
-          "parameters" : [
-            {
-              "type" : "header",
-              "value" : "standard_metadata"
-            }
-          ],
-          "source_info" : {
-            "filename" : "p4/tut-simple-router.p4",
-            "line" : 147,
-            "column" : 8,
-            "source_fragment" : "mark_to_drop(standard_metadata)"
-          }
-        }
-      ]
+      "primitives" : []
     },
     {
       "name" : "MyIngress.drop",
@@ -323,8 +307,52 @@
       ]
     },
     {
-      "name" : "MyIngress.ipv4_fwd",
+      "name" : "MyIngress.drop",
       "id" : 4,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "mark_to_drop",
+          "parameters" : [
+            {
+              "type" : "header",
+              "value" : "standard_metadata"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/tut-simple-router.p4",
+            "line" : 147,
+            "column" : 8,
+            "source_fragment" : "mark_to_drop(standard_metadata)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "MyIngress.drop",
+      "id" : 5,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "mark_to_drop",
+          "parameters" : [
+            {
+              "type" : "header",
+              "value" : "standard_metadata"
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/tut-simple-router.p4",
+            "line" : 147,
+            "column" : 8,
+            "source_fragment" : "mark_to_drop(standard_metadata)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "MyIngress.ipv4_fwd",
+      "id" : 6,
       "runtime_data" : [
         {
           "name" : "nxt_hop",
@@ -420,7 +448,7 @@
     },
     {
       "name" : "MyIngress.rewrite_src_mac",
-      "id" : 5,
+      "id" : 7,
       "runtime_data" : [
         {
           "name" : "src_mac",
@@ -451,7 +479,7 @@
     },
     {
       "name" : "MyIngress.rewrite_dst_mac",
-      "id" : 6,
+      "id" : 8,
       "runtime_data" : [
         {
           "name" : "dst_mac",
@@ -479,6 +507,102 @@
           }
         }
       ]
+    },
+    {
+      "name" : "MyIngress.acept_package",
+      "id" : 9,
+      "runtime_data" : [
+        {
+          "name" : "dest",
+          "bitwidth" : 32
+        },
+        {
+          "name" : "port",
+          "bitwidth" : 9
+        }
+      ],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "metadata.next_hop_ipv4"]
+            },
+            {
+              "type" : "runtime_data",
+              "value" : 0
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/tut-simple-router.p4",
+            "line" : 156,
+            "column" : 8,
+            "source_fragment" : "meta.next_hop_ipv4 = nxt_hop; ..."
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "runtime_data",
+              "value" : 1
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/tut-simple-router.p4",
+            "line" : 157,
+            "column" : 8,
+            "source_fragment" : "standard_metadata.egress_spec = port; ..."
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["ipv4", "ttl"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "+",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["ipv4", "ttl"]
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xff"
+                      }
+                    }
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "p4/tut-simple-router.p4",
+            "line" : 158,
+            "column" : 8,
+            "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
+          }
+        }
+      ]
     }
   ],
   "pipelines" : [
@@ -494,8 +618,52 @@
       "init_table" : "node_2",
       "tables" : [
         {
-          "name" : "MyIngress.ipv4_lpm",
+          "name" : "MyIngress.firewall",
           "id" : 0,
+          "source_info" : {
+            "filename" : "p4/tut-simple-router.p4",
+            "line" : 208,
+            "column" : 10,
+            "source_fragment" : "firewall"
+          },
+          "key" : [
+            {
+              "match_type" : "exact",
+              "name" : "hdr.ipv4.srcAddr",
+              "target" : ["ipv4", "srcAddr"],
+              "mask" : null
+            },
+            {
+              "match_type" : "exact",
+              "name" : "hdr.ipv4.dstAddr",
+              "target" : ["ipv4", "dstAddr"],
+              "mask" : null
+            }
+          ],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [9, 5, 1],
+          "actions" : ["MyIngress.acept_package", "MyIngress.drop", "NoAction"],
+          "base_default_next" : "MyIngress.ipv4_lpm",
+          "next_tables" : {
+            "MyIngress.acept_package" : "MyIngress.ipv4_lpm",
+            "MyIngress.drop" : "MyIngress.ipv4_lpm",
+            "NoAction" : "MyIngress.ipv4_lpm"
+          },
+          "default_entry" : {
+            "action_id" : 1,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        },
+        {
+          "name" : "MyIngress.ipv4_lpm",
+          "id" : 1,
           "source_info" : {
             "filename" : "p4/tut-simple-router.p4",
             "line" : 162,
@@ -516,7 +684,7 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [4, 1, 0],
+          "action_ids" : [6, 2, 0],
           "actions" : ["MyIngress.ipv4_fwd", "MyIngress.drop", "NoAction"],
           "base_default_next" : "MyIngress.src_mac",
           "next_tables" : {
@@ -533,7 +701,7 @@
         },
         {
           "name" : "MyIngress.src_mac",
-          "id" : 1,
+          "id" : 2,
           "source_info" : {
             "filename" : "p4/tut-simple-router.p4",
             "line" : 176,
@@ -554,7 +722,7 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [5, 2],
+          "action_ids" : [7, 3],
           "actions" : ["MyIngress.rewrite_src_mac", "MyIngress.drop"],
           "base_default_next" : "MyIngress.dst_mac",
           "next_tables" : {
@@ -562,7 +730,7 @@
             "MyIngress.drop" : "MyIngress.dst_mac"
           },
           "default_entry" : {
-            "action_id" : 2,
+            "action_id" : 3,
             "action_const" : false,
             "action_data" : [],
             "action_entry_const" : false
@@ -570,7 +738,7 @@
         },
         {
           "name" : "MyIngress.dst_mac",
-          "id" : 2,
+          "id" : 3,
           "source_info" : {
             "filename" : "p4/tut-simple-router.p4",
             "line" : 189,
@@ -591,7 +759,7 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [6, 3],
+          "action_ids" : [8, 4],
           "actions" : ["MyIngress.rewrite_dst_mac", "MyIngress.drop"],
           "base_default_next" : null,
           "next_tables" : {
@@ -599,7 +767,7 @@
             "MyIngress.drop" : null
           },
           "default_entry" : {
-            "action_id" : 3,
+            "action_id" : 4,
             "action_const" : false,
             "action_data" : [],
             "action_entry_const" : false
@@ -613,7 +781,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "p4/tut-simple-router.p4",
-            "line" : 204,
+            "line" : 224,
             "column" : 12,
             "source_fragment" : "hdr.ipv4.isValid()"
           },
@@ -629,7 +797,7 @@
             }
           },
           "false_next" : null,
-          "true_next" : "MyIngress.ipv4_lpm"
+          "true_next" : "MyIngress.firewall"
         }
       ]
     },
@@ -638,7 +806,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "p4/tut-simple-router.p4",
-        "line" : 216,
+        "line" : 237,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },
@@ -654,7 +822,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/tut-simple-router.p4",
-        "line" : 229,
+        "line" : 250,
         "column" : 1,
         "source_fragment" : "update_checksum( ..."
       },
