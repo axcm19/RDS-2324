@@ -2,6 +2,7 @@ reset_state
 table_set_default ipv4_lpm drop
 table_set_default src_mac drop
 table_set_default dst_mac drop
+table_set_default firewall drop
 table_add ipv4_lpm ipv4_fwd 10.0.1.10/32 => 10.0.1.10 443
 table_add ipv4_lpm ipv4_fwd 10.0.1.20/32 => 10.0.1.20 25
 table_add ipv4_lpm ipv4_fwd 10.0.1.100/32 => 10.0.1.100 1
@@ -29,4 +30,26 @@ table_add dst_mac rewrite_dst_mac 10.0.2.100 => 00:04:00:00:00:06
 table_add dst_mac rewrite_dst_mac 10.0.3.10 => 00:04:00:00:00:07
 table_add dst_mac rewrite_dst_mac 10.0.3.20 => 00:04:00:00:00:08
 table_add dst_mac rewrite_dst_mac 10.0.3.100 => 00:04:00:00:00:09
-table_add firewall 
+table_add firewall permit 10.0.2.0/24 => 1
+table_add firewall permit 10.0.3.0/24 => 1
+table_add firewall permit 10.0.2.10 => 1
+table_add firewall permit 10.0.3.10 => 1
+table_add firewall permit 10.0.1.0/24 => 1
+table_add firewall permit 10.0.3.0/24 => 1
+table_add firewall permit 10.0.1.10 => 1
+table_add firewall permit 10.0.3.20 => 1
+table_add firewall permit 10.0.1.0/24 => 1
+table_add firewall permit 10.0.2.0/24 => 1
+table_add firewall permit 10.0.1.20 => 1
+table_add firewall permit 10.0.2.20 => 1
+table_add firewall permit 10.0.1.10 => 1
+table_add firewall permit 10.0.2.20 => 1
+table_add firewall permit 10.0.1.0/24 10.0.2.0/24 25 => 1
+table_add firewall permit 10.0.2.0/24 10.0.1.0/24 25 => 1
+table_add firewall permit 10.0.1.0/24 10.0.2.0/24 443 => 1
+table_add firewall permit 10.0.2.0/24 10.0.1.0/24 80 => 1
+table_add firewall permit 10.0.1.0/24 10.0.3.0/24 8080 => 1
+table_add firewall permit 10.0.3.0/24 10.0.1.0/24 8080 => 1
+table_add firewall permit 10.0.3.0/24 10.0.1.0/24 443 => 1
+table_add firewall permit 10.0.2.0/24 10.0.3.0/24 443 => 1
+table_add firewall permit 10.0.3.0/24 10.0.2.0/24 443 => 1

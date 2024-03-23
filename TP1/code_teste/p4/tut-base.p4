@@ -74,15 +74,6 @@ header tcp_t {
 * This is user-defined. You can declare your own
 * variables inside this structure.
 */
-
-/*
-Let’s exclude ICMP. Our simple router will not answer to pings. Therefore, we only need 
-Ethernet and IPv4 headers.
-
-Let’s remove what we don’t need. You can remove everything TCP, the header tcp_t and 
-from the headers struct.
-*/
-
 struct metadata {
     ip4Addr_t   next_hop_ipv4;
 }
@@ -111,19 +102,15 @@ parser MyParser(packet_in packet,
         transition parse_ethernet;
     }
 
-    
+    /*
     state parse_ethernet {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
-            TYPE_IPV4:  parse_ipv4;
+            TYPE_IPV4:  <the name of the ipv4 parser>
             default: accept;
         }
     }
-
-    state parse_ipv4 {
-        packet.extract(hdr.ipv4); // extract function populates the ipv4 header
-        transition accept;
-    }
+    */
 
 }
 
@@ -143,98 +130,23 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
-    
-
     action drop() {
         mark_to_drop(standard_metadata);
     }
-
 
     /**
     * this is your main pipeline
     * where we define the actions and tables
     */
 
-    action ipv4_fwd(ip4Addr_t nxt_hop, egressSpec_t port) {
-        meta.next_hop_ipv4 = nxt_hop;
-        standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-    }
-
-    action permit() {
-        ipv4_fwd(meta.next_hop_ipv4, standard_metadata.egress_spec);
-    }
-
-
-    table ipv4_lpm {
-        key = { hdr.ipv4.dstAddr : lpm; }
-        actions = {
-        ipv4_fwd;
-        drop;
-        NoAction;
-        }
-        default_action = NoAction(); // NoAction is defined in v1model - does nothing
-    }
-
-    action rewrite_src_mac(macAddr_t src_mac) {
-        hdr.ethernet.srcAddr = src_mac;
-    }
-
-    table src_mac {
-        key = { standard_metadata.egress_spec : exact; }
-        actions = {
-        rewrite_src_mac;
-        drop;
-        }
-        default_action = drop;
-    }
-
-    action rewrite_dst_mac(macAddr_t dst_mac) {
-        hdr.ethernet.dstAddr = dst_mac;
-    }
-
-    table dst_mac {
-        key = { meta.next_hop_ipv4 : exact; }
-        actions = {
-        rewrite_dst_mac;
-        drop;
-        }
-        default_action = drop;
-    }
-
-
-
-    table firewall {
-        key = {
-            hdr.ipv4.srcAddr: lpm;
-            hdr.ipv4.dstAddr: lpm;
-            hdr.tcp.dstPort: exact;
-        }
-        actions = { permit; drop; }
-        default_action = drop;
-    }
-
-
+    
     
     apply {
         /**
         * The conditions and order in which the software 
         * switch must apply the tables. 
         */
-        if (hdr.ipv4.isValid() && hdr.tcp.isValid()) {
-            ipv4_lpm.apply();
-            src_mac.apply();
-            dst_mac.apply();
-            firewall.apply();
-        }
     }
-
-    /*apply {
-        if (hdr.ipv4.isValid() && hdr.tcp.isValid()) {
-            firewall.apply();
-        }
-    }*/
-
 }
 
 /*************************************************************************
@@ -244,17 +156,7 @@ control MyIngress(inout headers hdr,
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    /*
-    action send_frame(egressSpec_t port) {
-        standard_metadata.egress_spec = port;
-    }
-
-    apply {
-        // Envie o pacote pela porta de saída especificada em standard_metadata.egress_spec
-        send_frame(standard_metadata.egress_spec);
-    }
-    */
-    apply {  }
+    apply { /* do nothing */ }
 }
 
 /*************************************************************************
@@ -292,8 +194,6 @@ control MyDeparser(packet_out packet, in headers hdr) {
         * add the extracted headers to the packet 
         * packet.emit(hdr.ethernet);
         */
-        packet.emit(hdr.ethernet);
-        packet.emit(hdr.ipv4);
     }
 }
 
