@@ -90,7 +90,7 @@ struct metadata {
 struct headers {
     ethernet_t   ethernet;
     ipv4_t       ipv4;
-    tcp_t        tcp;
+    //tcp_t        tcp;
 }
 
 /*************************************************************************
@@ -143,12 +143,9 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
-    
-
     action drop() {
         mark_to_drop(standard_metadata);
     }
-
 
     /**
     * this is your main pipeline
@@ -159,10 +156,6 @@ control MyIngress(inout headers hdr,
         meta.next_hop_ipv4 = nxt_hop;
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-    }
-
-    action permit() {
-        ipv4_fwd(meta.next_hop_ipv4, standard_metadata.egress_spec);
     }
 
 
@@ -202,18 +195,25 @@ control MyIngress(inout headers hdr,
         default_action = drop;
     }
 
-
-
-    table firewall {
-        key = {
-            hdr.ipv4.srcAddr: lpm;
-            hdr.ipv4.dstAddr: lpm;
-            hdr.tcp.dstPort: exact;
-        }
-        actions = { permit; drop; }
-        default_action = drop;
+    action acept_package(ip4Addr_t dest, egressSpec_t port) {
+        ipv4_fwd(dest, port);
     }
 
+    /*
+    REGRAS DA FIREWALL
+    h1 só pode receber pacotes de h3
+    h2 recebe de todos
+    h3 só pode receber de h2
+    */
+    table firewall {
+        key = { hdr.ipv4.srcAddr : exact; hdr.ipv4.dstAddr : exact; }
+        actions = {
+        acept_package;
+        drop;
+        NoAction;
+        }
+        default_action = NoAction(); // NoAction is defined in v1model - does nothing
+    }
 
     
     apply {
@@ -221,20 +221,13 @@ control MyIngress(inout headers hdr,
         * The conditions and order in which the software 
         * switch must apply the tables. 
         */
-        if (hdr.ipv4.isValid() && hdr.tcp.isValid()) {
+        if (hdr.ipv4.isValid()) {
+            //firewall.apply();
             ipv4_lpm.apply();
             src_mac.apply();
-            dst_mac.apply();
-            firewall.apply();
+            dst_mac.apply();  
         }
     }
-
-    /*apply {
-        if (hdr.ipv4.isValid() && hdr.tcp.isValid()) {
-            firewall.apply();
-        }
-    }*/
-
 }
 
 /*************************************************************************
@@ -244,17 +237,7 @@ control MyIngress(inout headers hdr,
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    /*
-    action send_frame(egressSpec_t port) {
-        standard_metadata.egress_spec = port;
-    }
-
-    apply {
-        // Envie o pacote pela porta de saída especificada em standard_metadata.egress_spec
-        send_frame(standard_metadata.egress_spec);
-    }
-    */
-    apply {  }
+    apply { /* do nothing */ }
 }
 
 /*************************************************************************

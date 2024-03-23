@@ -111,78 +111,99 @@ class SingleSwitchTopo(Topo):
         # adding host and link with the right mac and ip addrs
         # declaring a link: addr2=sw_mac gives a mac to the switch port
         
+        #-------------------------------------------------------------------------------
         # LAN 1
-        for h in range(0,3):
-            if h == 0:
-                host = self.addHost('svr11',
-                                    ip = "10.0.1.10/24",
-                                    mac = host_mac_base % (h + 1))
 
+        host1 = self.addHost('svr11',
+                            ip = "10.0.1.10/24",
+                            mac = host_mac_base % (1))
 
-                sw_mac = sw_mac_base % (h + 1)
-                self.addLink(host, s1, addr2=sw_mac)
-            if h == 1:
-                host = self.addHost('svr12',
-                                    ip = "10.0.1.20/24",
-                                    mac = host_mac_base % (h + 1))
-                sw_mac = sw_mac_base % (h + 1)
-                self.addLink(host, s1, addr2=sw_mac)
-            if h == 2:
-                host = self.addHost('h11',
-                                    ip = "10.0.1.100/24",
-                                    mac = host_mac_base % (h + 1))
-                sw_mac = sw_mac_base % (h + 1)
-                self.addLink(host, s1, addr2=sw_mac)
-                
+        sw_mac1 = sw_mac_base % (1)
+        self.addLink(host1, s1, addr2=sw_mac1)
+
+        host2 = self.addHost('svr12',
+                            ip = "10.0.1.20/24",
+                            mac = host_mac_base % (2))
+        sw_mac2 = sw_mac_base % (2)
+        self.addLink(host2, s1, addr2=sw_mac2)
+
+        host3 = self.addHost('h11',
+                            ip = "10.0.1.100/24",
+                            mac = host_mac_base % (3))
+        sw_mac3 = sw_mac_base % (1)
+        self.addLink(host3, s1, addr2=sw_mac3)
+
+        #-------------------------------------------------------------------------------      
         # LAN 2
-        for h in range(3,6):
-            if h == 3:
-                host = self.addHost('svr21',
-                                    ip = "10.0.2.10/24",
-                                    mac = host_mac_base % (h + 1))
-                sw_mac = sw_mac_base % (h + 1)
-                self.addLink(host, s2, addr2=sw_mac)
-            if h == 4:
-                host = self.addHost('svr22',
-                                    ip = "10.0.2.20/24",
-                                    mac = host_mac_base % (h + 1))
-                sw_mac = sw_mac_base % (h + 1)
-                self.addLink(host, s2, addr2=sw_mac)
-            if h == 5:
-                host = self.addHost('h21',
-                                    ip = "10.0.2.100/24",
-                                    mac = host_mac_base % (h + 1))
-                sw_mac = sw_mac_base % (h + 1)
-                self.addLink(host, s2, addr2=sw_mac)
 
+        host4 = self.addHost('svr21',
+                            ip = "10.0.2.10/24",
+                            mac = host_mac_base % (4))
+        sw_mac4 = sw_mac_base % (4)
+        self.addLink(host4, s2, addr2=sw_mac4)
+
+        host5 = self.addHost('svr22',
+                            ip = "10.0.2.20/24",
+                            mac = host_mac_base % (5))
+        sw_mac5 = sw_mac_base % (5)
+        self.addLink(host5, s2, addr2=sw_mac5)
+
+        host6 = self.addHost('h21',
+                            ip = "10.0.2.100/24",
+                            mac = host_mac_base % (6))
+        sw_mac6 = sw_mac_base % (6)
+        self.addLink(host6, s2, addr2=sw_mac6)
+
+        #-------------------------------------------------------------------------------
         # LAN 3
-        for h in range(6,9):
-            if h == 6:
-                host = self.addHost('svr31',
-                                    ip = "10.0.3.10/24",
-                                    mac = host_mac_base % (h + 1))
-                sw_mac = sw_mac_base % (h + 1)
-                self.addLink(host, s3, addr2=sw_mac)
-            if h == 7:
-                host = self.addHost('svr32',
-                                    ip = "10.0.3.20/24",
-                                    mac = host_mac_base % (h + 1))
-                sw_mac = sw_mac_base % (h + 1)
-                self.addLink(host, s3, addr2=sw_mac)
-            if h == 8:
-                host = self.addHost('h31',
-                                    ip = "10.0.3.100/24",
-                                    mac = host_mac_base % (h + 1))
-                sw_mac = sw_mac_base % (h + 1)
-                self.addLink(host, s3, addr2=sw_mac)
+
+        host7 = self.addHost('svr31',
+                            ip = "10.0.3.10/24",
+                            mac = host_mac_base % (7))
+        sw_mac7 = sw_mac_base % (7)
+        self.addLink(host7, s3, addr2=sw_mac7)
+
+        host8 = self.addHost('svr32',
+                            ip = "10.0.3.20/24",
+                            mac = host_mac_base % (8))
+        sw_mac8 = sw_mac_base % (8)
+        self.addLink(host8, s3, addr2=sw_mac8)
+
+        host9 = self.addHost('h31',
+                            ip = "10.0.3.100/24",
+                            mac = host_mac_base % (9))
+        sw_mac9 = sw_mac_base % (9)
+        self.addLink(host9, s3, addr2=sw_mac9)
+
+        #-------------------------------------------------------------------------------
 
         #adicionar links entre switchs e routers
-        self.addLink(s1, r1, addr2=sw_mac)
-        self.addLink(s2, r2, addr2=sw_mac)
-        self.addLink(s3, r3, addr2=sw_mac)
-        self.addLink(r1, r3, addr2=sw_mac)
-        self.addLink(r1, r2, addr2=sw_mac)
-        self.addLink(r2, r3, addr2=sw_mac)
+
+        sw_mac10 = sw_mac_base % (10)
+        sw_mac11 = sw_mac_base % (11)
+
+        sw_mac12 = sw_mac_base % (12)
+        sw_mac13 = sw_mac_base % (13)
+
+        sw_mac14 = sw_mac_base % (14)
+        sw_mac15 = sw_mac_base % (15)
+
+        sw_mac16 = sw_mac_base % (16)
+        sw_mac17 = sw_mac_base % (17)
+
+        sw_mac18 = sw_mac_base % (18)
+        sw_mac19 = sw_mac_base % (19)
+
+        sw_mac20 = sw_mac_base % (20)
+        sw_mac21 = sw_mac_base % (21)
+
+
+        self.addLink(s1, r1, addr1=sw_mac10 ,addr2=sw_mac11)
+        self.addLink(s2, r2, addr1=sw_mac12 ,addr2=sw_mac13)
+        self.addLink(s3, r3, addr1=sw_mac14 ,addr2=sw_mac15)
+        self.addLink(r1, r3, addr1=sw_mac16 ,addr2=sw_mac17)
+        self.addLink(r1, r2, addr1=sw_mac18 ,addr2=sw_mac19)
+        self.addLink(r2, r3, addr1=sw_mac20 ,addr2=sw_mac21)
 
 def main():
     num_hosts = args.num_hosts
