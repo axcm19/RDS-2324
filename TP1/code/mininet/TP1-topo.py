@@ -100,13 +100,16 @@ class SingleSwitchTopo(Topo):
 
         # adicionar os 3 switches OVS
         s1 = self.addSwitch('s1',
-                            cls = OVSSwitch)
+                            cls = OVSSwitch,
+                            protocols = 'OpenFlow13')
 
         s2 = self.addSwitch('s2',
-                            cls = OVSSwitch)
+                            cls = OVSSwitch,
+                            protocols = 'OpenFlow13')
 
         s3 = self.addSwitch('s3',
-                            cls = OVSSwitch)
+                            cls = OVSSwitch,
+                            protocols = 'OpenFlow13')
         
         # adding host and link with the right mac and ip addrs
         # declaring a link: addr2=sw_mac gives a mac to the switch port
