@@ -31,7 +31,7 @@ from mininet.net import Mininet
 from mininet.topo import Topo
 from mininet.log import setLogLevel, info
 from mininet.cli import CLI
-from mininet.node import OVSSwitch
+from mininet.node import OVSKernelSwitch
 
 from p4_mininet import P4Switch, P4Host
 
@@ -100,16 +100,16 @@ class SingleSwitchTopo(Topo):
 
         # adicionar os 3 switches OVS
         s1 = self.addSwitch('s1',
-                            cls = OVSSwitch,
-                            protocols = 'OpenFlow13')
+                            cls = OVSKernelSwitch,
+                            protocols = "OpenFlow13")
 
         s2 = self.addSwitch('s2',
-                            cls = OVSSwitch,
-                            protocols = 'OpenFlow13')
+                            cls = OVSKernelSwitch,
+                            protocols = "OpenFlow13")
 
         s3 = self.addSwitch('s3',
-                            cls = OVSSwitch,
-                            protocols = 'OpenFlow13')
+                            cls = OVSKernelSwitch,
+                            protocols = "OpenFlow13")
         
         # adding host and link with the right mac and ip addrs
         # declaring a link: addr2=sw_mac gives a mac to the switch port
@@ -133,7 +133,7 @@ class SingleSwitchTopo(Topo):
         host3 = self.addHost('h11',
                             ip = "10.0.1.100/24",
                             mac = host_mac_base % (3))
-        sw_mac3 = sw_mac_base % (1)
+        sw_mac3 = sw_mac_base % (3)
         self.addLink(host3, s1, addr2=sw_mac3)
 
         #-------------------------------------------------------------------------------      
@@ -156,6 +156,7 @@ class SingleSwitchTopo(Topo):
                             mac = host_mac_base % (6))
         sw_mac6 = sw_mac_base % (6)
         self.addLink(host6, s2, addr2=sw_mac6)
+
 
         #-------------------------------------------------------------------------------
         # LAN 3
@@ -182,23 +183,23 @@ class SingleSwitchTopo(Topo):
 
         #adicionar links entre switchs e routers
 
-        sw_mac10 = sw_mac_base % (10)
-        sw_mac11 = sw_mac_base % (11)
+        sw_mac10 = "00:aa:bb:00:00:10"
+        sw_mac11 = "00:aa:bb:00:00:11"
 
-        sw_mac12 = sw_mac_base % (12)
-        sw_mac13 = sw_mac_base % (13)
+        sw_mac12 = "00:aa:bb:00:00:12"
+        sw_mac13 = "00:aa:bb:00:00:13"
 
-        sw_mac14 = sw_mac_base % (14)
-        sw_mac15 = sw_mac_base % (15)
+        sw_mac14 = "00:aa:bb:00:00:14"
+        sw_mac15 = "00:aa:bb:00:00:15"
 
-        sw_mac16 = sw_mac_base % (16)
-        sw_mac17 = sw_mac_base % (17)
+        sw_mac16 = "00:aa:bb:00:00:16"
+        sw_mac17 = "00:aa:bb:00:00:17"
 
-        sw_mac18 = sw_mac_base % (18)
-        sw_mac19 = sw_mac_base % (19)
+        sw_mac18 = "00:aa:bb:00:00:18"
+        sw_mac19 = "00:aa:bb:00:00:19"
 
-        sw_mac20 = sw_mac_base % (20)
-        sw_mac21 = sw_mac_base % (21)
+        sw_mac20 = "00:aa:bb:00:00:20"
+        sw_mac21 = "00:aa:bb:00:00:21"
 
 
         self.addLink(s1, r1, addr1=sw_mac10 ,addr2=sw_mac11)
