@@ -31,7 +31,7 @@ from mininet.net import Mininet
 from mininet.topo import Topo
 from mininet.log import setLogLevel, info
 from mininet.cli import CLI
-from mininet.node import OVSKernelSwitch
+from mininet.node import OVSSwitch
 
 from p4_mininet import P4Switch, P4Host
 
@@ -100,16 +100,13 @@ class SingleSwitchTopo(Topo):
 
         # adicionar os 3 switches OVS
         s1 = self.addSwitch('s1',
-                            cls = OVSKernelSwitch,
-                            protocols = "OpenFlow13")
+                            cls = OVSSwitch)
 
         s2 = self.addSwitch('s2',
-                            cls = OVSKernelSwitch,
-                            protocols = "OpenFlow13")
+                            cls = OVSSwitch)
 
         s3 = self.addSwitch('s3',
-                            cls = OVSKernelSwitch,
-                            protocols = "OpenFlow13")
+                            cls = OVSSwitch)
         
         # adding host and link with the right mac and ip addrs
         # declaring a link: addr2=sw_mac gives a mac to the switch port
@@ -251,13 +248,58 @@ def main():
     """
 
     hosts = [node for node in net.topo.hosts() if isinstance(node, net.host)]
-    for h in hosts:
-        hs = net.get(h.__name__)
-        hs.setARP(sw_addr[n], sw_mac[n])
-        hs.setDefaultRoute("dev eth0 via %s" % sw_addr[n])
+    
+    gateway_mac_r1 = "00:aa:bb:00:00:11"
+    gateway_ip_r1 = "10.0.1.254"
+    gateway_mac_r2 = "00:aa:bb:00:00:13"
+    gateway_ip_r2 = "10.0.2.254"
+    gateway_mac_r3 = "00:aa:bb:00:00:15"
+    gateway_ip_r3 = "10.0.3.254"
 
-    for h in hosts:
-        hs = net.get(h.__name__)
+
+
+
+    h11 = net.get('h11')
+    h11.setARP(gateway_ip_r1,gateway_mac_r1)
+    h11.setDefaultRoute("dev eth0 via %s" % gateway_ip_r1)
+
+    svr11 = net.get('svr11')
+    svr11.setARP(gateway_ip_r1,gateway_mac_r1)
+    svr11.setDefaultRoute("dev eth0 via %s" % gateway_ip_r1)
+
+    svr12 = net.get('svr12')
+    svr12.setARP(gateway_ip_r1,gateway_mac_r1)
+    svr12.setDefaultRoute("dev eth0 via %s" % gateway_ip_r1)
+
+    h21 = net.get('h21')
+    h21.setARP(gateway_ip_r2,gateway_mac_r2)
+    h21.setDefaultRoute("dev eth0 via %s" % gateway_ip_r2)
+
+    svr21 = net.get('svr21')
+    svr21.setARP(gateway_ip_r2,gateway_mac_r2)
+    svr21.setDefaultRoute("dev eth0 via %s" % gateway_ip_r2)
+
+    svr22 = net.get('svr22')
+    svr22.setARP(gateway_ip_r2,gateway_mac_r2)
+    svr22.setDefaultRoute("dev eth0 via %s" % gateway_ip_r2)
+
+    h31 = net.get('h31')
+    h31.setARP(gateway_ip_r3,gateway_mac_r3)
+    h31.setDefaultRoute("dev eth0 via %s" % gateway_ip_r3)
+
+    svr31 = net.get('svr31')
+    svr31.setARP(gateway_ip_r3,gateway_mac_r3)
+    svr31.setDefaultRoute("dev eth0 via %s" % gateway_ip_r3)
+
+    svr32 = net.get('svr32')
+    svr32.setARP(gateway_ip_r3,gateway_mac_r3)
+    svr32.setDefaultRoute("dev eth0 via %s" % gateway_ip_r3)
+
+
+
+    # Exibe informações sobre os hosts
+    for n in hosts:
+        hs = net.get(n.__name__)
         hs.describe()
 
     sleep(1)  # time for the host and switch confs to take effect
