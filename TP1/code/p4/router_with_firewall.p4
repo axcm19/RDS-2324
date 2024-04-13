@@ -90,7 +90,7 @@ struct metadata {
 struct headers {
     ethernet_t   ethernet;
     ipv4_t       ipv4;
-    //tcp_t        tcp;
+    tcp_t        tcp;
 }
 
 /*************************************************************************
@@ -120,8 +120,24 @@ parser MyParser(packet_in packet,
         }
     }
 
+    /*
     state parse_ipv4 {
         packet.extract(hdr.ipv4); // extract function populates the ipv4 header
+        transition accept;
+    }*/
+
+    
+
+    state parse_ipv4 {
+        packet.extract(hdr.ipv4); // extract function populates the ipv4 header
+        transition select(hdr.ipv4.protocol){
+            TYPE_TCP: parse_tcp;
+            default: accept;
+        }
+    }
+
+    state parse_tcp {
+        packet.extract(hdr.tcp); // extract function populates the tcp header
         transition accept;
     }
 
@@ -195,24 +211,64 @@ control MyIngress(inout headers hdr,
         default_action = drop;
     }
 
-    action acept_package(ip4Addr_t dest, egressSpec_t port) {
-        ipv4_fwd(dest, port);
+    /*
+    --------------------------------------------------------------------------------------------------------------------
+
+    REGRAS DA FIREWALL:
+    
+    • Sales (LAN1):
+        – Needs access to CRM systems (TCP port 443) and email servers (TCP port 25, 587).
+        – Should have limited access to R&D (LAN2) and Management (LAN3) for specific services:
+            ∗ Access to Research Server 1 (10.0.2.10) on TCP port 80.
+            ∗ Access to Financial Data Server 1 (10.0.3.10) on TCP port 8080.
+
+    • Research & Development (R&D) (LAN2):
+        – Requires access to dedicated research servers (IP range: 10.0.2.0/24).
+        – Should have limited access to Sales (LAN1) and Management (LAN3) for specific services:
+            ∗ Access to Email Server (10.0.1.20) on TCP port 25.
+            ∗ Access to Financial Data Server 2 (10.0.3.20) on TCP port 443.
+
+    • Management (LAN3):
+        – Needs secure access to financial data servers (TCP port 8080) and administrative systems (TCP port 22 for SSH).
+        – Should have limited access to Sales (LAN1) and R&D (LAN2) for specific services:
+            ∗ Access to CRM System (10.0.1.10) on TCP port 443.
+            ∗ Access to Research Server 2 (10.0.2.20) on TCP port 22.
+
+    --------------------------------------------------------------------------------------------------------------------
+    
+    TOPOLOGIA:
+
+    • Sales (LAN1):
+        CRM System (10.0.1.10)
+        Email Server (10.0.1.20)
+        Host11 (10.0.1.100)
+
+    • Research & Development (R&D) (LAN2):
+        Research Server 1 (10.0.2.10)
+        Research Server 2 (10.0.2.20)
+        Host21 (10.0.2.100)
+
+    • Management (LAN3):
+        Financial Data Server 1 (10.0.3.10)
+        Data Server 2 (10.0.3.20)
+        Host31 (10.0.3.100)
+
+    --------------------------------------------------------------------------------------------------------------------
+
+    */
+
+    action acept_package(ip4Addr_t dest) {
+        ipv4_fwd(dest, 1);
     }
 
-    /*
-    REGRAS DA FIREWALL
-    h1 só pode receber pacotes de h3
-    h2 recebe de todos
-    h3 só pode receber de h2
-    */
     table firewall {
-        key = { hdr.ipv4.srcAddr : exact; hdr.ipv4.dstAddr : exact; }
+        key = { hdr.ipv4.srcAddr : lpm; hdr.ipv4.dstAddr : exact; hdr.ipv4.protocol : exact; hdr.tcp.dstPort : exact;}
         actions = {
         acept_package;
         drop;
         NoAction;
         }
-        default_action = NoAction(); // NoAction is defined in v1model - does nothing
+        default_action = drop(); 
     }
 
     
@@ -222,7 +278,7 @@ control MyIngress(inout headers hdr,
         * switch must apply the tables. 
         */
         if (hdr.ipv4.isValid()) {
-            //firewall.apply();
+            firewall.apply();
             ipv4_lpm.apply();
             src_mac.apply();
             dst_mac.apply();  
@@ -277,6 +333,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
         */
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
+        packet.emit(hdr.tcp);
     }
 }
 
