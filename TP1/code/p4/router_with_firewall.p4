@@ -159,6 +159,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
+
     action drop() {
         mark_to_drop(standard_metadata);
     }
@@ -249,39 +250,51 @@ control MyIngress(inout headers hdr,
         Host21 (10.0.2.100)
 
     • Management (LAN3):
-        Financial Data Server 1 (10.0.3.10)
-        Data Server 2 (10.0.3.20)
+        Financial Data Server 1 (10.0.3.10)   ]___________ Administrative Systems
+        Financial Data Server 2 (10.0.3.20)   ]
         Host31 (10.0.3.100)
 
     --------------------------------------------------------------------------------------------------------------------
 
     */
 
-    action acept_package(ip4Addr_t dest) {
-        ipv4_fwd(dest, 1);
+    action accept_package() {
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
     table firewall {
         key = { hdr.ipv4.srcAddr : lpm; hdr.ipv4.dstAddr : exact; hdr.ipv4.protocol : exact; hdr.tcp.dstPort : exact;}
         actions = {
-        acept_package;
         drop;
         NoAction;
+        accept_package;
         }
-        default_action = drop(); 
+        default_action = NoAction(); 
     }
 
     
+    /* 
+    APPLY - VERSÃO DE TESTE!!!
+    Este apply não faz sentido nenhum na logica do trabalho mas serve apenas para testar se as regras que injetamos nos routers estão a ser bem lidas pelo programa.
+    Se os pacotes que cumprem as regras da tabela (dão hit) forem dropados mas aqueles que não 
+    cumprem seguem viagem, então as regras que injetamos estão bem feitas.
+    */
     apply {
         /**
         * The conditions and order in which the software 
         * switch must apply the tables. 
         */
-        if (hdr.ipv4.isValid()) {
-            firewall.apply();
-            ipv4_lpm.apply();
-            src_mac.apply();
-            dst_mac.apply();  
+        if(hdr.ipv4.isValid()){
+
+            if (firewall.apply().hit) {
+                drop();             
+            }
+
+            else{
+                ipv4_lpm.apply();
+                src_mac.apply();
+                dst_mac.apply(); 
+            }
         }
     }
 }
