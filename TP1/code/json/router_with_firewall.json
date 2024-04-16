@@ -237,7 +237,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/router_with_firewall.p4",
-        "line" : 341,
+        "line" : 335,
         "column" : 8,
         "source_fragment" : "MyDeparser"
       },
@@ -254,7 +254,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/router_with_firewall.p4",
-        "line" : 319,
+        "line" : 313,
         "column" : 1,
         "source_fragment" : "update_checksum( ..."
       },
@@ -410,30 +410,8 @@
       ]
     },
     {
-      "name" : "MyIngress.drop",
-      "id" : 6,
-      "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "mark_to_drop",
-          "parameters" : [
-            {
-              "type" : "header",
-              "value" : "standard_metadata"
-            }
-          ],
-          "source_info" : {
-            "filename" : "p4/router_with_firewall.p4",
-            "line" : 164,
-            "column" : 8,
-            "source_fragment" : "mark_to_drop(standard_metadata)"
-          }
-        }
-      ]
-    },
-    {
       "name" : "MyIngress.ipv4_fwd",
-      "id" : 7,
+      "id" : 6,
       "runtime_data" : [
         {
           "name" : "nxt_hop",
@@ -529,7 +507,7 @@
     },
     {
       "name" : "MyIngress.rewrite_src_mac",
-      "id" : 8,
+      "id" : 7,
       "runtime_data" : [
         {
           "name" : "src_mac",
@@ -560,7 +538,7 @@
     },
     {
       "name" : "MyIngress.rewrite_dst_mac",
-      "id" : 9,
+      "id" : 8,
       "runtime_data" : [
         {
           "name" : "dst_mac",
@@ -588,55 +566,6 @@
           }
         }
       ]
-    },
-    {
-      "name" : "MyIngress.accept_package",
-      "id" : 10,
-      "runtime_data" : [],
-      "primitives" : [
-        {
-          "op" : "assign",
-          "parameters" : [
-            {
-              "type" : "field",
-              "value" : ["ipv4", "ttl"]
-            },
-            {
-              "type" : "expression",
-              "value" : {
-                "type" : "expression",
-                "value" : {
-                  "op" : "&",
-                  "left" : {
-                    "type" : "expression",
-                    "value" : {
-                      "op" : "+",
-                      "left" : {
-                        "type" : "field",
-                        "value" : ["ipv4", "ttl"]
-                      },
-                      "right" : {
-                        "type" : "hexstr",
-                        "value" : "0xff"
-                      }
-                    }
-                  },
-                  "right" : {
-                    "type" : "hexstr",
-                    "value" : "0xff"
-                  }
-                }
-              }
-            }
-          ],
-          "source_info" : {
-            "filename" : "p4/router_with_firewall.p4",
-            "line" : 262,
-            "column" : 8,
-            "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
-          }
-        }
-      ]
     }
   ],
   "pipelines" : [
@@ -652,11 +581,123 @@
       "init_table" : "node_2",
       "tables" : [
         {
-          "name" : "MyIngress.firewall",
+          "name" : "MyIngress.ipv4_lpm",
           "id" : 0,
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 265,
+            "line" : 179,
+            "column" : 10,
+            "source_fragment" : "ipv4_lpm"
+          },
+          "key" : [
+            {
+              "match_type" : "lpm",
+              "name" : "hdr.ipv4.dstAddr",
+              "target" : ["ipv4", "dstAddr"],
+              "mask" : null
+            }
+          ],
+          "match_type" : "lpm",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [6, 2, 0],
+          "actions" : ["MyIngress.ipv4_fwd", "MyIngress.drop", "NoAction"],
+          "base_default_next" : "MyIngress.src_mac",
+          "next_tables" : {
+            "MyIngress.ipv4_fwd" : "MyIngress.src_mac",
+            "MyIngress.drop" : "MyIngress.src_mac",
+            "NoAction" : "MyIngress.src_mac"
+          },
+          "default_entry" : {
+            "action_id" : 0,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        },
+        {
+          "name" : "MyIngress.src_mac",
+          "id" : 1,
+          "source_info" : {
+            "filename" : "p4/router_with_firewall.p4",
+            "line" : 193,
+            "column" : 10,
+            "source_fragment" : "src_mac"
+          },
+          "key" : [
+            {
+              "match_type" : "exact",
+              "name" : "standard_metadata.egress_spec",
+              "target" : ["standard_metadata", "egress_spec"],
+              "mask" : null
+            }
+          ],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [7, 3],
+          "actions" : ["MyIngress.rewrite_src_mac", "MyIngress.drop"],
+          "base_default_next" : "MyIngress.dst_mac",
+          "next_tables" : {
+            "MyIngress.rewrite_src_mac" : "MyIngress.dst_mac",
+            "MyIngress.drop" : "MyIngress.dst_mac"
+          },
+          "default_entry" : {
+            "action_id" : 3,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        },
+        {
+          "name" : "MyIngress.dst_mac",
+          "id" : 2,
+          "source_info" : {
+            "filename" : "p4/router_with_firewall.p4",
+            "line" : 206,
+            "column" : 10,
+            "source_fragment" : "dst_mac"
+          },
+          "key" : [
+            {
+              "match_type" : "exact",
+              "name" : "meta.next_hop_ipv4",
+              "target" : ["scalars", "metadata.next_hop_ipv4"],
+              "mask" : null
+            }
+          ],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [8, 4],
+          "actions" : ["MyIngress.rewrite_dst_mac", "MyIngress.drop"],
+          "base_default_next" : "node_6",
+          "next_tables" : {
+            "MyIngress.rewrite_dst_mac" : "node_6",
+            "MyIngress.drop" : "node_6"
+          },
+          "default_entry" : {
+            "action_id" : 4,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        },
+        {
+          "name" : "MyIngress.firewall",
+          "id" : 3,
+          "source_info" : {
+            "filename" : "p4/router_with_firewall.p4",
+            "line" : 261,
             "column" : 10,
             "source_fragment" : "firewall"
           },
@@ -692,156 +733,15 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [5, 1, 10],
-          "actions" : ["MyIngress.drop", "NoAction", "MyIngress.accept_package"],
+          "action_ids" : [5, 1],
+          "actions" : ["MyIngress.drop", "NoAction"],
           "base_default_next" : null,
           "next_tables" : {
-            "__HIT__" : "tbl_drop",
-            "__MISS__" : "MyIngress.ipv4_lpm"
+            "MyIngress.drop" : null,
+            "NoAction" : null
           },
           "default_entry" : {
             "action_id" : 1,
-            "action_const" : false,
-            "action_data" : [],
-            "action_entry_const" : false
-          }
-        },
-        {
-          "name" : "tbl_drop",
-          "id" : 1,
-          "source_info" : {
-            "filename" : "p4/router_with_firewall.p4",
-            "line" : 290,
-            "column" : 16,
-            "source_fragment" : "drop()"
-          },
-          "key" : [],
-          "match_type" : "exact",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
-          "action_ids" : [6],
-          "actions" : ["MyIngress.drop"],
-          "base_default_next" : null,
-          "next_tables" : {
-            "MyIngress.drop" : null
-          },
-          "default_entry" : {
-            "action_id" : 6,
-            "action_const" : true,
-            "action_data" : [],
-            "action_entry_const" : true
-          }
-        },
-        {
-          "name" : "MyIngress.ipv4_lpm",
-          "id" : 2,
-          "source_info" : {
-            "filename" : "p4/router_with_firewall.p4",
-            "line" : 179,
-            "column" : 10,
-            "source_fragment" : "ipv4_lpm"
-          },
-          "key" : [
-            {
-              "match_type" : "lpm",
-              "name" : "hdr.ipv4.dstAddr",
-              "target" : ["ipv4", "dstAddr"],
-              "mask" : null
-            }
-          ],
-          "match_type" : "lpm",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
-          "action_ids" : [7, 2, 0],
-          "actions" : ["MyIngress.ipv4_fwd", "MyIngress.drop", "NoAction"],
-          "base_default_next" : "MyIngress.src_mac",
-          "next_tables" : {
-            "MyIngress.ipv4_fwd" : "MyIngress.src_mac",
-            "MyIngress.drop" : "MyIngress.src_mac",
-            "NoAction" : "MyIngress.src_mac"
-          },
-          "default_entry" : {
-            "action_id" : 0,
-            "action_const" : false,
-            "action_data" : [],
-            "action_entry_const" : false
-          }
-        },
-        {
-          "name" : "MyIngress.src_mac",
-          "id" : 3,
-          "source_info" : {
-            "filename" : "p4/router_with_firewall.p4",
-            "line" : 193,
-            "column" : 10,
-            "source_fragment" : "src_mac"
-          },
-          "key" : [
-            {
-              "match_type" : "exact",
-              "name" : "standard_metadata.egress_spec",
-              "target" : ["standard_metadata", "egress_spec"],
-              "mask" : null
-            }
-          ],
-          "match_type" : "exact",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
-          "action_ids" : [8, 3],
-          "actions" : ["MyIngress.rewrite_src_mac", "MyIngress.drop"],
-          "base_default_next" : "MyIngress.dst_mac",
-          "next_tables" : {
-            "MyIngress.rewrite_src_mac" : "MyIngress.dst_mac",
-            "MyIngress.drop" : "MyIngress.dst_mac"
-          },
-          "default_entry" : {
-            "action_id" : 3,
-            "action_const" : false,
-            "action_data" : [],
-            "action_entry_const" : false
-          }
-        },
-        {
-          "name" : "MyIngress.dst_mac",
-          "id" : 4,
-          "source_info" : {
-            "filename" : "p4/router_with_firewall.p4",
-            "line" : 206,
-            "column" : 10,
-            "source_fragment" : "dst_mac"
-          },
-          "key" : [
-            {
-              "match_type" : "exact",
-              "name" : "meta.next_hop_ipv4",
-              "target" : ["scalars", "metadata.next_hop_ipv4"],
-              "mask" : null
-            }
-          ],
-          "match_type" : "exact",
-          "type" : "simple",
-          "max_size" : 1024,
-          "with_counters" : false,
-          "support_timeout" : false,
-          "direct_meters" : null,
-          "action_ids" : [9, 4],
-          "actions" : ["MyIngress.rewrite_dst_mac", "MyIngress.drop"],
-          "base_default_next" : null,
-          "next_tables" : {
-            "MyIngress.rewrite_dst_mac" : null,
-            "MyIngress.drop" : null
-          },
-          "default_entry" : {
-            "action_id" : 4,
             "action_const" : false,
             "action_data" : [],
             "action_entry_const" : false
@@ -855,7 +755,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 287,
+            "line" : 282,
             "column" : 11,
             "source_fragment" : "hdr.ipv4.isValid()"
           },
@@ -871,6 +771,29 @@
             }
           },
           "false_next" : null,
+          "true_next" : "MyIngress.ipv4_lpm"
+        },
+        {
+          "name" : "node_6",
+          "id" : 1,
+          "source_info" : {
+            "filename" : "p4/router_with_firewall.p4",
+            "line" : 288,
+            "column" : 15,
+            "source_fragment" : "hdr.tcp.isValid()"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "d2b",
+              "left" : null,
+              "right" : {
+                "type" : "field",
+                "value" : ["tcp", "$valid$"]
+              }
+            }
+          },
+          "false_next" : null,
           "true_next" : "MyIngress.firewall"
         }
       ]
@@ -880,7 +803,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "p4/router_with_firewall.p4",
-        "line" : 306,
+        "line" : 300,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },
@@ -896,7 +819,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/router_with_firewall.p4",
-        "line" : 319,
+        "line" : 313,
         "column" : 1,
         "source_fragment" : "update_checksum( ..."
       },

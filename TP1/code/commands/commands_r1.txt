@@ -1,13 +1,8 @@
 reset_state
-table_set_default firewall drop
 table_set_default ipv4_lpm drop
 table_set_default src_mac drop
 table_set_default dst_mac drop
-table_add firewall accept_package 10.0.1.0/24 10.0.1.10 0x06 443 =>
-table_add firewall accept_package 10.0.1.0/24 10.0.1.20 0x06 25 =>
-table_add firewall accept_package 10.0.1.0/24 10.0.1.20 0x06 587 =>
-table_add firewall accept_package 10.0.2.0/24 10.0.1.20 0x06 25 =>
-table_add firewall accept_package 10.0.3.0/24 10.0.1.10 0x06 443 =>
+table_set_default firewall drop
 table_add ipv4_lpm ipv4_fwd 10.0.1.10/32 => 10.0.1.10 1
 table_add ipv4_lpm ipv4_fwd 10.0.1.20/32 => 10.0.1.20 1
 table_add ipv4_lpm ipv4_fwd 10.0.1.100/32 => 10.0.1.100 1
@@ -25,3 +20,8 @@ table_add dst_mac rewrite_dst_mac 10.0.1.20 => 00:04:00:00:00:02
 table_add dst_mac rewrite_dst_mac 10.0.1.100 => 00:04:00:00:00:03
 table_add dst_mac rewrite_dst_mac 10.0.2.254 => 00:aa:bb:00:00:19
 table_add dst_mac rewrite_dst_mac 10.0.3.254 => 00:aa:bb:00:00:17
+table_add firewall NoAction 10.0.1.0/24 10.0.1.10 0x06 443 =>
+table_add firewall NoAction 10.0.1.0/24 10.0.1.20 0x06 25 =>
+table_add firewall NoAction 10.0.1.0/24 10.0.1.20 0x06 587 =>
+table_add firewall NoAction 10.0.2.0/24 10.0.1.20 0x06 25 =>
+table_add firewall NoAction 10.0.3.0/24 10.0.1.10 0x06 443 =>

@@ -258,16 +258,11 @@ control MyIngress(inout headers hdr,
 
     */
 
-    action accept_package() {
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-    }
-
     table firewall {
         key = { hdr.ipv4.srcAddr : lpm; hdr.ipv4.dstAddr : exact; hdr.ipv4.protocol : exact; hdr.tcp.dstPort : exact;}
         actions = {
         drop;
         NoAction;
-        accept_package;
         }
         default_action = NoAction(); 
     }
@@ -286,15 +281,14 @@ control MyIngress(inout headers hdr,
         */
         if(hdr.ipv4.isValid()){
 
-            if (firewall.apply().hit) {
-                drop();             
-            }
+            ipv4_lpm.apply();
+            src_mac.apply();
+            dst_mac.apply();   
 
-            else{
-                ipv4_lpm.apply();
-                src_mac.apply();
-                dst_mac.apply(); 
-            }
+            if(hdr.tcp.isValid()){
+                firewall.apply();
+            }         
+        
         }
     }
 }
