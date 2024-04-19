@@ -237,7 +237,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/router_with_firewall.p4",
-        "line" : 335,
+        "line" : 334,
         "column" : 8,
         "source_fragment" : "MyDeparser"
       },
@@ -254,7 +254,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/router_with_firewall.p4",
-        "line" : 313,
+        "line" : 312,
         "column" : 1,
         "source_fragment" : "update_checksum( ..."
       },
@@ -680,10 +680,10 @@
           "direct_meters" : null,
           "action_ids" : [8, 4],
           "actions" : ["MyIngress.rewrite_dst_mac", "MyIngress.drop"],
-          "base_default_next" : "node_6",
+          "base_default_next" : "MyIngress.firewall",
           "next_tables" : {
-            "MyIngress.rewrite_dst_mac" : "node_6",
-            "MyIngress.drop" : "node_6"
+            "MyIngress.rewrite_dst_mac" : "MyIngress.firewall",
+            "MyIngress.drop" : "MyIngress.firewall"
           },
           "default_entry" : {
             "action_id" : 4,
@@ -721,13 +721,13 @@
               "mask" : null
             },
             {
-              "match_type" : "exact",
+              "match_type" : "range",
               "name" : "hdr.tcp.dstPort",
               "target" : ["tcp", "dstPort"],
               "mask" : null
             }
           ],
-          "match_type" : "lpm",
+          "match_type" : "range",
           "type" : "simple",
           "max_size" : 1024,
           "with_counters" : false,
@@ -755,7 +755,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 282,
+            "line" : 277,
             "column" : 11,
             "source_fragment" : "hdr.ipv4.isValid()"
           },
@@ -771,14 +771,14 @@
             }
           },
           "false_next" : null,
-          "true_next" : "MyIngress.ipv4_lpm"
+          "true_next" : "node_3"
         },
         {
-          "name" : "node_6",
+          "name" : "node_3",
           "id" : 1,
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 288,
+            "line" : 279,
             "column" : 15,
             "source_fragment" : "hdr.tcp.isValid()"
           },
@@ -794,7 +794,7 @@
             }
           },
           "false_next" : null,
-          "true_next" : "MyIngress.firewall"
+          "true_next" : "MyIngress.ipv4_lpm"
         }
       ]
     },
@@ -803,7 +803,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "p4/router_with_firewall.p4",
-        "line" : 300,
+        "line" : 299,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },
@@ -819,7 +819,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/router_with_firewall.p4",
-        "line" : 313,
+        "line" : 312,
         "column" : 1,
         "source_fragment" : "update_checksum( ..."
       },

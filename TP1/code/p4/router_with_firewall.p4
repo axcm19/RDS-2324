@@ -259,36 +259,35 @@ control MyIngress(inout headers hdr,
     */
 
     table firewall {
-        key = { hdr.ipv4.srcAddr : lpm; hdr.ipv4.dstAddr : exact; hdr.ipv4.protocol : exact; hdr.tcp.dstPort : exact;}
+        key = { hdr.ipv4.srcAddr : lpm; hdr.ipv4.dstAddr : exact; hdr.ipv4.protocol : exact; hdr.tcp.dstPort : range;}
         actions = {
         drop;
         NoAction;
         }
-        default_action = NoAction(); 
+        default_action = NoAction;
     }
 
-    
-    /* 
-    APPLY - VERSÃO DE TESTE!!!
-    Este apply não faz sentido nenhum na logica do trabalho mas serve apenas para testar se as regras que injetamos nos routers estão a ser bem lidas pelo programa.
-    Se os pacotes que cumprem as regras da tabela (dão hit) forem dropados mas aqueles que não 
-    cumprem seguem viagem, então as regras que injetamos estão bem feitas.
-    */
     apply {
         /**
         * The conditions and order in which the software 
         * switch must apply the tables. 
         */
-        if(hdr.ipv4.isValid()){
 
-            ipv4_lpm.apply();
-            src_mac.apply();
-            dst_mac.apply();   
+
+        if(hdr.ipv4.isValid()){ 
 
             if(hdr.tcp.isValid()){
+                
+                /* primeiro aplica regras de encaminhamento */
+                ipv4_lpm.apply();
+                src_mac.apply();
+                dst_mac.apply();  
+
+                /* só depois aplica a firewall */
                 firewall.apply();
-            }         
-        
+            }
+
+              
         }
     }
 }
