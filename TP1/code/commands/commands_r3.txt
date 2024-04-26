@@ -22,6 +22,8 @@ table_add dst_mac rewrite_dst_mac 10.0.3.20 => 00:04:00:00:00:08
 table_add dst_mac rewrite_dst_mac 10.0.3.100 => 00:04:00:00:00:09
 table_add firewall drop 10.0.1.0/24 10.0.3.10 0x06 0->8079 => 1
 table_add firewall drop 10.0.1.0/24 10.0.3.10 0x06 8081->65535 => 1
+table_add firewall drop 10.0.1.0/24 10.0.3.20 0x06 0->65535 => 1
+table_add firewall drop 10.0.2.0/24 10.0.3.10 0x06 0->65535 => 1
 table_add firewall drop 10.0.2.0/24 10.0.3.20 0x06 0->442 => 1
 table_add firewall drop 10.0.2.0/24 10.0.3.20 0x06 444->65535 => 1
 
