@@ -237,7 +237,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/router_with_firewall.p4",
-        "line" : 334,
+        "line" : 335,
         "column" : 8,
         "source_fragment" : "MyDeparser"
       },
@@ -254,7 +254,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/router_with_firewall.p4",
-        "line" : 312,
+        "line" : 313,
         "column" : 1,
         "source_fragment" : "update_checksum( ..."
       },
@@ -336,7 +336,7 @@
           ],
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 164,
+            "line" : 165,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -358,7 +358,7 @@
           ],
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 164,
+            "line" : 165,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -380,7 +380,7 @@
           ],
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 164,
+            "line" : 165,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -402,7 +402,7 @@
           ],
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 164,
+            "line" : 165,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -437,7 +437,7 @@
           ],
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 173,
+            "line" : 174,
             "column" : 8,
             "source_fragment" : "meta.next_hop_ipv4 = nxt_hop"
           }
@@ -456,7 +456,7 @@
           ],
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 174,
+            "line" : 175,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = port"
           }
@@ -498,7 +498,7 @@
           ],
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 175,
+            "line" : 176,
             "column" : 8,
             "source_fragment" : "hdr.ipv4.ttl = hdr.ipv4.ttl - 1"
           }
@@ -529,7 +529,7 @@
           ],
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 190,
+            "line" : 191,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.srcAddr = src_mac"
           }
@@ -560,7 +560,7 @@
           ],
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 203,
+            "line" : 204,
             "column" : 8,
             "source_fragment" : "hdr.ethernet.dstAddr = dst_mac"
           }
@@ -574,7 +574,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/router_with_firewall.p4",
-        "line" : 159,
+        "line" : 160,
         "column" : 8,
         "source_fragment" : "MyIngress"
       },
@@ -585,7 +585,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 179,
+            "line" : 180,
             "column" : 10,
             "source_fragment" : "ipv4_lpm"
           },
@@ -623,7 +623,7 @@
           "id" : 1,
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 193,
+            "line" : 194,
             "column" : 10,
             "source_fragment" : "src_mac"
           },
@@ -660,7 +660,7 @@
           "id" : 2,
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 206,
+            "line" : 207,
             "column" : 10,
             "source_fragment" : "dst_mac"
           },
@@ -697,7 +697,7 @@
           "id" : 3,
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 261,
+            "line" : 262,
             "column" : 10,
             "source_fragment" : "firewall"
           },
@@ -755,7 +755,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "p4/router_with_firewall.p4",
-            "line" : 277,
+            "line" : 278,
             "column" : 11,
             "source_fragment" : "hdr.ipv4.isValid()"
           },
@@ -771,29 +771,6 @@
             }
           },
           "false_next" : null,
-          "true_next" : "node_3"
-        },
-        {
-          "name" : "node_3",
-          "id" : 1,
-          "source_info" : {
-            "filename" : "p4/router_with_firewall.p4",
-            "line" : 279,
-            "column" : 15,
-            "source_fragment" : "hdr.tcp.isValid()"
-          },
-          "expression" : {
-            "type" : "expression",
-            "value" : {
-              "op" : "d2b",
-              "left" : null,
-              "right" : {
-                "type" : "field",
-                "value" : ["tcp", "$valid$"]
-              }
-            }
-          },
-          "false_next" : null,
           "true_next" : "MyIngress.ipv4_lpm"
         }
       ]
@@ -803,7 +780,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "p4/router_with_firewall.p4",
-        "line" : 299,
+        "line" : 300,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },
@@ -819,7 +796,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/router_with_firewall.p4",
-        "line" : 312,
+        "line" : 313,
         "column" : 1,
         "source_fragment" : "update_checksum( ..."
       },

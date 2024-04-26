@@ -13,6 +13,7 @@
 const bit<16> TYPE_IPV4 = 0x800;
 const bit<8> TYPE_TCP  = 0x06;
 const bit<8> TYPE_UDP  = 0x11;
+const bit<8> TYPE_ICMP = 0x01;
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -275,19 +276,15 @@ control MyIngress(inout headers hdr,
 
 
         if(hdr.ipv4.isValid()){ 
+      
+            /* primeiro aplica regras de encaminhamento */
+            ipv4_lpm.apply();
+            src_mac.apply();
+            dst_mac.apply();  
 
-            if(hdr.tcp.isValid()){
-                
-                /* primeiro aplica regras de encaminhamento */
-                ipv4_lpm.apply();
-                src_mac.apply();
-                dst_mac.apply();  
-
-                /* só depois aplica a firewall */
-                firewall.apply();
-            }
-
-              
+            /* só depois aplica a firewall */
+            firewall.apply();
+  
         }
     }
 }
