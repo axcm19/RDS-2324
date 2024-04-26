@@ -94,6 +94,7 @@ struct headers {
     tcp_t        tcp;
 }
 
+
 /*************************************************************************
 *********************** P A R S E R  ***********************************
 *************************************************************************/
@@ -268,6 +269,15 @@ control MyIngress(inout headers hdr,
         default_action = NoAction;
     }
 
+    table firewall_2 {
+        key = { hdr.ipv4.srcAddr : lpm; hdr.ipv4.dstAddr : range; hdr.ipv4.protocol : range;}
+        actions = {
+        drop;
+        NoAction;
+        }
+        default_action = NoAction;
+    }
+
     apply {
         /**
         * The conditions and order in which the software 
@@ -283,6 +293,7 @@ control MyIngress(inout headers hdr,
             dst_mac.apply();  
 
             /* só depois aplica a firewall */
+            firewall_2.apply();
             firewall.apply();
   
         }
