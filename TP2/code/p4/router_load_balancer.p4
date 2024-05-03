@@ -68,6 +68,12 @@ header tcp_t {
     bit<16> urgentPtr;
 }
 
+header icmp_t {
+    bit<8>  type;
+    bit<8>  code;
+    bit<16> checksum;
+}
+
 
 /**
 * You can use this structure to pass 
@@ -92,6 +98,7 @@ struct headers {
     ethernet_t   ethernet;
     ipv4_t       ipv4;
     tcp_t        tcp;
+    icmp_t       icmp;
 }
 
 
@@ -134,12 +141,18 @@ parser MyParser(packet_in packet,
         packet.extract(hdr.ipv4); // extract function populates the ipv4 header
         transition select(hdr.ipv4.protocol){
             TYPE_TCP: parse_tcp;
+            TYPE_ICMP: parse_icmp;
             default: accept;
         }
     }
 
     state parse_tcp {
         packet.extract(hdr.tcp); // extract function populates the tcp header
+        transition accept;
+    }
+
+    state parse_icmp {
+        packet.extract(hdr.icmp); // extract function populates the icmp header
         transition accept;
     }
 
@@ -278,6 +291,20 @@ control MyIngress(inout headers hdr,
         default_action = NoAction;
     }
 
+    action respond_icmp() {
+        hdr.ipv4.dstAddr = hdr.ipv4.srcAddr;
+        hdr.icmp.type = 0x00;
+    }
+
+    table icmp_for_router {
+        key = { hdr.ipv4.srcAddr : lpm; hdr.ipv4.dstAddr : exact; hdr.ipv4.protocol : exact;}
+        actions = {
+        respond_icmp;
+        NoAction;
+        }
+        default_action = NoAction;
+    }
+
     apply {
         /**
         * The conditions and order in which the software 
@@ -286,6 +313,9 @@ control MyIngress(inout headers hdr,
 
 
         if(hdr.ipv4.isValid()){ 
+
+            /* primeiro aplicar regras para o ICMP */
+            icmp_for_router.apply();
       
             /* primeiro aplica regras de encaminhamento */
             ipv4_lpm.apply();
@@ -348,6 +378,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
         packet.emit(hdr.tcp);
+        packet.emit(hdr.icmp);
     }
 }
 

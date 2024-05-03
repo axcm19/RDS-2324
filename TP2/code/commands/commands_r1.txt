@@ -4,6 +4,7 @@ table_set_default src_mac drop
 table_set_default dst_mac drop
 table_set_default firewall NoAction
 table_set_default firewall_2 NoAction
+table_set_default icmp_for_router NoAction
 table_add ipv4_lpm ipv4_fwd 10.0.1.10/32 => 10.0.1.10 1
 table_add ipv4_lpm ipv4_fwd 10.0.1.20/32 => 10.0.1.20 1
 table_add ipv4_lpm ipv4_fwd 10.0.1.100/32 => 10.0.1.100 1
@@ -31,3 +32,6 @@ table_add firewall_2 drop 10.0.2.0/24 10.0.1.0&&&255.255.255.0 0x00->0x05 => 1
 table_add firewall_2 drop 10.0.2.0/24 10.0.1.0&&&255.255.255.0 0x07->0xFF => 1
 table_add firewall_2 drop 10.0.3.0/24 10.0.1.0&&&255.255.255.0 0x00->0x05 => 1
 table_add firewall_2 drop 10.0.3.0/24 10.0.1.0&&&255.255.255.0 0x07->0xFF => 1
+table_add icmp_for_router respond_icmp 10.0.1.0/24 10.0.1.254 0x01 => 
+table_add icmp_for_router respond_icmp 10.0.2.0/24 10.0.1.254 0x01 =>
+table_add icmp_for_router respond_icmp 10.0.3.0/24 10.0.1.254 0x01 =>
