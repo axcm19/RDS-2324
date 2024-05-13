@@ -163,7 +163,25 @@ parser MyParser(packet_in packet,
 *************************************************************************/
 
 control MyVerifyChecksum(inout headers hdr, inout metadata meta) {   
-    apply { /* do nothing */  }
+    //apply { /* do nothing */  }
+
+    apply {
+    verify_checksum(
+        hdr.ipv4.isValid(),
+            { hdr.ipv4.version,
+              hdr.ipv4.ihl,
+              hdr.ipv4.diffserv,
+              hdr.ipv4.totalLen,
+              hdr.ipv4.identification,
+              hdr.ipv4.flags,
+              hdr.ipv4.fragOffset,
+              hdr.ipv4.ttl,
+              hdr.ipv4.protocol,
+              hdr.ipv4.srcAddr,
+              hdr.ipv4.dstAddr
+            },
+            hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+    }
 }
 
 
@@ -283,7 +301,8 @@ control MyIngress(inout headers hdr,
     }
 
     table firewall_2 {
-        key = { hdr.ipv4.srcAddr : lpm; hdr.ipv4.dstAddr : ternary; hdr.ipv4.protocol : range;}
+        //key = { hdr.ipv4.srcAddr : lpm; hdr.ipv4.dstAddr : ternary; hdr.ipv4.protocol : range;}
+        key = { hdr.ipv4.srcAddr : lpm; hdr.ipv4.dstAddr : range; hdr.ipv4.protocol : range;}
         actions = {
         drop;
         NoAction;
@@ -292,12 +311,27 @@ control MyIngress(inout headers hdr,
     }
 
     action respond_icmp() {
-        hdr.ipv4.dstAddr = hdr.ipv4.srcAddr;
-        hdr.icmp.type = 0x00;
+        // Swap source and destination IP addresses
+        bit<32> tmp_ip;
+        tmp_ip = hdr.ipv4.srcAddr;
+        hdr.ipv4.srcAddr = hdr.ipv4.dstAddr;
+        hdr.ipv4.dstAddr = tmp_ip;
+
+        // Swap source and destination MAC addresses
+        bit<48> tmp_mac;
+        tmp_mac = hdr.ethernet.srcAddr;
+        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+        hdr.ethernet.dstAddr = tmp_mac;
+        
+        // Set ICMP type to Echo Reply (0)
+        hdr.icmp.type = 0;
+
+        //Calculate checksum
+        hdr.icmp.checksum = hdr.icmp.checksum + 2048;
     }
 
     table icmp_for_router {
-        key = { hdr.ipv4.srcAddr : lpm; hdr.ipv4.dstAddr : exact; hdr.ipv4.protocol : exact;}
+        key = {hdr.ipv4.dstAddr : exact; hdr.ipv4.protocol : exact;}
         actions = {
         respond_icmp;
         NoAction;
@@ -325,7 +359,6 @@ control MyIngress(inout headers hdr,
             /* só depois aplica a firewall */
             firewall_2.apply();
             firewall.apply();
-  
         }
     }
 }

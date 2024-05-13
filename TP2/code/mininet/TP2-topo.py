@@ -296,6 +296,21 @@ def main():
     svr32.setDefaultRoute("dev eth0 via %s" % gateway_ip_r3)
 
 
+    # adiciona ip's a todas as interfaces do router r1 (eth1 -> 10.0.1.254)
+    router = net.get('r1')  
+    router.cmd('ip addr add 10.0.1.252/24 dev eth2')    
+    router.cmd('ip addr add 10.0.1.253/24 dev eth3')
+
+    # adiciona ip's a todas as interfaces do router r2 (eth1 -> 10.0.2.254)
+    router = net.get('r2')  
+    router.cmd('ip addr add 10.0.2.252/24 dev eth2')    
+    router.cmd('ip addr add 10.0.2.253/24 dev eth3')
+
+    # adiciona ip's a todas as interfaces do router r3 (eth1 -> 10.0.3.254)
+    router = net.get('r3')  
+    router.cmd('ip addr add 10.0.3.252/24 dev eth2')    
+    router.cmd('ip addr add 10.0.3.253/24 dev eth3')
+
 
     # Exibe informações sobre os hosts
     for n in hosts:
