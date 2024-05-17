@@ -1,10 +1,10 @@
-!!!!!!!! REGRAS ANTIGAS !!!!!!!!
-
 reset_state
 table_set_default ipv4_lpm drop
 table_set_default src_mac drop
 table_set_default dst_mac drop
 table_set_default firewall NoAction
+table_set_default firewall_2 NoAction
+table_set_default icmp_for_router NoAction
 table_add ipv4_lpm ipv4_fwd 10.0.1.10/32 => 10.0.1.10 1
 table_add ipv4_lpm ipv4_fwd 10.0.1.20/32 => 10.0.1.20 1
 table_add ipv4_lpm ipv4_fwd 10.0.1.100/32 => 10.0.1.100 1
@@ -14,6 +14,8 @@ table_add ipv4_lpm ipv4_fwd 10.0.2.100/32 => 10.0.2.254 3
 table_add ipv4_lpm ipv4_fwd 10.0.3.10/32 => 10.0.3.254 2
 table_add ipv4_lpm ipv4_fwd 10.0.3.20/32 => 10.0.3.254 2
 table_add ipv4_lpm ipv4_fwd 10.0.3.100/32 => 10.0.3.254 2
+table_add ipv4_lpm ipv4_fwd 10.0.2.254/32 => 10.0.2.254 3
+table_add ipv4_lpm ipv4_fwd 10.0.3.254/32 => 10.0.3.254 2
 table_add src_mac rewrite_src_mac 1 => 00:aa:bb:00:00:11
 table_add src_mac rewrite_src_mac 2 => 00:aa:bb:00:00:16
 table_add src_mac rewrite_src_mac 3 => 00:aa:bb:00:00:18
@@ -28,10 +30,10 @@ table_add firewall drop 10.0.2.0/24 10.0.1.20 0x06 26->65535 => 1
 table_add firewall drop 10.0.3.0/24 10.0.1.10 0x06 0->442 => 1
 table_add firewall drop 10.0.3.0/24 10.0.1.10 0x06 444->65535 => 1
 table_add firewall drop 10.0.3.0/24 10.0.1.20 0x06 0->65535 => 1
-table_add firewall drop 10.0.2.0/24 10.0.1.100 0x06 0->65535 => 1
-table_add firewall drop 10.0.3.0/24 10.0.1.100 0x06 0->65535 => 1
-
-
-
-
-
+table_add firewall_2 NoAction 10.0.2.254/32 10.0.1.100->10.0.1.100 0x01->0x01 => 1
+table_add firewall_2 NoAction 10.0.3.254/32 10.0.1.100->10.0.1.100 0x01->0x01 => 1
+table_add firewall_2 drop 10.0.2.0/24 10.0.1.0->10.0.1.253 0x00->0x05 => 2
+table_add firewall_2 drop 10.0.2.0/24 10.0.1.0->10.0.1.253 0x07->0xFF => 2
+table_add firewall_2 drop 10.0.3.0/24 10.0.1.0->10.0.1.253 0x00->0x05 => 2
+table_add firewall_2 drop 10.0.3.0/24 10.0.1.0->10.0.1.253 0x07->0xFF => 2
+table_add icmp_for_router respond_icmp 10.0.1.254 0x01 =>
