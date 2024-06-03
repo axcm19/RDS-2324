@@ -72,12 +72,6 @@ class SingleSwitchTopo(Topo):
         # Initialize topology and default options
         Topo.__init__(self, **opts)
         # adding a P4Switch
-        """
-        switch = self.addSwitch('s1',
-                                sw_path = sw_path,
-                                json_path = json_path,
-                                thrift_port = thrift_port)
-        """
 
         # adicionar os 3 routers(switches)
         r1 = self.addSwitch('r1',
@@ -226,6 +220,26 @@ def main():
     # our software switch.
     net.start()
 
+
+    # adiciona ip's a todas as interfaces do router r1 
+    router = net.get('r1')  
+    router.cmd('sudo ifconfig r1-eth1 10.0.1.254/32') 
+    router.cmd('sudo ifconfig r1-eth2 10.0.1.252/32') 
+    router.cmd('sudo ifconfig r1-eth3 10.0.1.253/32') 
+
+    # adiciona ip's a todas as interfaces do router r2 
+    router = net.get('r2')  
+    router.cmd('sudo ifconfig r2-eth1 10.0.2.254/32') 
+    router.cmd('sudo ifconfig r2-eth2 10.0.2.252/32') 
+    router.cmd('sudo ifconfig r2-eth3 10.0.2.253/32') 
+
+    # adiciona ip's a todas as interfaces do router r3 
+    router = net.get('r3')  
+    router.cmd('sudo ifconfig r3-eth1 10.0.3.254/32') 
+    router.cmd('sudo ifconfig r3-eth2 10.0.3.252/32') 
+    router.cmd('sudo ifconfig r3-eth3 10.0.3.253/32') 
+
+
     # an array of the mac addrs from the switch
     sw_mac = [sw_mac_base % (n + 1) for n in range(num_hosts)]
     # an array of the ip addrs from the switch 
@@ -236,16 +250,6 @@ def main():
     # h.setDefaultRoute() sets the defaultRoute for the host
     # populating the arp table of the host with the switch ip and switch mac
     # avoids the need for arp request from the host
-    """
-    for n in range(num_hosts):
-        h = net.get('h%d' % (n + 1))
-        h.setARP(sw_addr[n], sw_mac[n])
-        h.setDefaultRoute("dev eth0 via %s" % sw_addr[n])
-
-    for n in range(num_hosts):
-        h = net.get('h%d' % (n + 1))
-        h.describe()
-    """
 
     hosts = [node for node in net.topo.hosts() if isinstance(node, net.host)]
     
@@ -255,8 +259,6 @@ def main():
     gateway_ip_r2 = "10.0.2.254"
     gateway_mac_r3 = "00:aa:bb:00:00:15"
     gateway_ip_r3 = "10.0.3.254"
-
-
 
 
     h11 = net.get('h11')
@@ -295,21 +297,6 @@ def main():
     svr32.setARP(gateway_ip_r3,gateway_mac_r3)
     svr32.setDefaultRoute("dev eth0 via %s" % gateway_ip_r3)
 
-
-    # adiciona ip's a todas as interfaces do router r1 (eth1 -> 10.0.1.254)
-    router = net.get('r1')  
-    router.cmd('ip addr add 10.0.1.252/24 dev eth2')    
-    router.cmd('ip addr add 10.0.1.253/24 dev eth3')
-
-    # adiciona ip's a todas as interfaces do router r2 (eth1 -> 10.0.2.254)
-    router = net.get('r2')  
-    router.cmd('ip addr add 10.0.2.252/24 dev eth2')    
-    router.cmd('ip addr add 10.0.2.253/24 dev eth3')
-
-    # adiciona ip's a todas as interfaces do router r3 (eth1 -> 10.0.3.254)
-    router = net.get('r3')  
-    router.cmd('ip addr add 10.0.3.252/24 dev eth2')    
-    router.cmd('ip addr add 10.0.3.253/24 dev eth3')
 
 
     # Exibe informações sobre os hosts

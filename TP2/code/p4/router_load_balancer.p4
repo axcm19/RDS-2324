@@ -301,7 +301,6 @@ control MyIngress(inout headers hdr,
     }
 
     table firewall_2 {
-        //key = { hdr.ipv4.srcAddr : lpm; hdr.ipv4.dstAddr : ternary; hdr.ipv4.protocol : range;}
         key = { hdr.ipv4.srcAddr : lpm; hdr.ipv4.dstAddr : range; hdr.ipv4.protocol : range;}
         actions = {
         drop;
