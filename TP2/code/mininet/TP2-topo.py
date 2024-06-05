@@ -218,26 +218,7 @@ def main():
     # Here, the mininet will use the constructor (__init__()) of the P4Switch class, 
     # with the arguments passed to the SingleSwitchTopo class in order to create 
     # our software switch.
-    net.start()
-
-
-    # adiciona ip's a todas as interfaces do router r1 
-    router = net.get('r1')  
-    router.cmd('sudo ifconfig r1-eth1 10.0.1.254/32') 
-    router.cmd('sudo ifconfig r1-eth2 10.0.1.252/32') 
-    router.cmd('sudo ifconfig r1-eth3 10.0.1.253/32') 
-
-    # adiciona ip's a todas as interfaces do router r2 
-    router = net.get('r2')  
-    router.cmd('sudo ifconfig r2-eth1 10.0.2.254/32') 
-    router.cmd('sudo ifconfig r2-eth2 10.0.2.252/32') 
-    router.cmd('sudo ifconfig r2-eth3 10.0.2.253/32') 
-
-    # adiciona ip's a todas as interfaces do router r3 
-    router = net.get('r3')  
-    router.cmd('sudo ifconfig r3-eth1 10.0.3.254/32') 
-    router.cmd('sudo ifconfig r3-eth2 10.0.3.252/32') 
-    router.cmd('sudo ifconfig r3-eth3 10.0.3.253/32') 
+    net.start() 
 
 
     # an array of the mac addrs from the switch
