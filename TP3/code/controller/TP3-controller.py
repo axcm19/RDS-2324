@@ -16,8 +16,12 @@ from p4runtime_lib.error_utils import printGrpcError
 from p4runtime_lib.switch import ShutdownAllSwitchConnections
 
 #port mac mapping
-port_mac_mapping_r1 = {1: "00:bb:bb:00:01:01", 2: "00:bb:bb:00:01:02"}
-port_mac_mapping_r2 = {1: "00:bb:bb:00:02:01", 2: "00:bb:bb:00:02:02"}
+port_mac_mapping_r1 = {1: "00:aa:bb:00:00:11", 2: "00:aa:bb:00:00:16", 3: "00:aa:bb:00:00:18"}
+port_mac_mapping_r2 = {1: "00:aa:bb:00:00:13", 2: "00:aa:bb:00:00:19", 3: "00:aa:bb:00:00:20"}
+port_mac_mapping_r3 = {1: "00:aa:bb:00:00:15", 2: "00:aa:bb:00:00:17", 3: "00:aa:bb:00:00:21"}
+
+
+
 
 def printGrpcError(e):
     print("gRPC Error:", e.details(), end=' ')
@@ -25,6 +29,10 @@ def printGrpcError(e):
     print("(%s)" % status_code.name, end=' ')
     traceback = sys.exc_info()[2]
     print("[%s:%d]" % (traceback.tb_frame.f_code.co_filename, traceback.tb_lineno))
+
+
+
+
 
 def readTableRules(p4info_helper, sw):
     """
@@ -52,6 +60,10 @@ def readTableRules(p4info_helper, sw):
                 print('%r' % p.value, end=' ')
             print()
 
+
+
+
+
 def writeSrcMac(p4info_helper, sw, port_mac_mapping):
     for port, mac in port_mac_mapping.items():
         table_entry = p4info_helper.buildTableEntry(
@@ -65,6 +77,10 @@ def writeSrcMac(p4info_helper, sw, port_mac_mapping):
             })
         sw.WriteTableEntry(table_entry)
     print("Installed MAC SRC rules on %s" % sw.name)
+
+
+
+
 
 
 def writeFwdRules(p4info_helper, sw, dstAddr, mask, nextHop, port, dstMac):
@@ -93,6 +109,9 @@ def writeFwdRules(p4info_helper, sw, dstAddr, mask, nextHop, port, dstMac):
     print("Installed FWD rule on %s" % sw.name)
 
 
+
+
+
 def printCounter(p4info_helper, sw, counter_name, index):
     for response in sw.ReadCounters(p4info_helper.get_counters_id(counter_name), index):
         for entity in response.entities:
@@ -101,6 +120,9 @@ def printCounter(p4info_helper, sw, counter_name, index):
                 sw.name, counter_name, index,
                 counter.data.packet_count, counter.data.byte_count
             ))
+
+
+
 
 
 def main(p4info_file_path, bmv2_file_path):
@@ -120,35 +142,64 @@ def main(p4info_file_path, bmv2_file_path):
             address='127.0.0.1:50052',
             device_id=2,
             proto_dump_file='logs/r2-p4runtime-request.txt')
+        r3 = p4runtime_lib.bmv2.Bmv2SwitchConnection(
+            name='r3',
+            address='127.0.0.1:50053',
+            device_id=3,
+            proto_dump_file='logs/r3-p4runtime-request.txt')
         print("connection successful")
 
         # Send master arbitration update message to establish this controller as
         # master (required by P4Runtime before performing any other write operation)
         r1.MasterArbitrationUpdate()
         r2.MasterArbitrationUpdate()
+        r3.MasterArbitrationUpdate()
 
         # Install the P4 program on the switches
         r1.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
                                        bmv2_json_file_path=bmv2_file_path)
         print("Installed P4 Program using SetForwardingPipelineConfig on r1")
+
+
         r2.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
                                        bmv2_json_file_path=bmv2_file_path)
         print("Installed P4 Program using SetForwardingPipelineConfig on r2")
 
+
+        r3.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
+                                       bmv2_json_file_path=bmv2_file_path)
+        print("Installed P4 Program using SetForwardingPipelineConfig on r3")
+
         writeSrcMac(p4info_helper, r1, port_mac_mapping_r1)
         writeSrcMac(p4info_helper, r2, port_mac_mapping_r2)
+        writeSrcMac(p4info_helper, r3, port_mac_mapping_r3)
 
+        # writeFwdRules(p4info_helper, nome_router, dstAddr, mask, nextHop, port, dstMac)
         #r1 fwd
-        writeFwdRules(p4info_helper, r1, "10.0.1.10", 32, "10.0.1.10", 1, "00:aa:00:00:01:01")
-        writeFwdRules(p4info_helper, r1, "10.0.1.20", 32, "10.0.1.20", 1, "00:aa:00:00:01:02")
-        writeFwdRules(p4info_helper, r1, "10.0.2.0", 24, "10.0.4.2", 2, "00:bb:bb:00:02:02")
+        writeFwdRules(p4info_helper, r1, "10.0.1.10", 32, "10.0.1.10", 1, "00:04:00:00:00:01")
+        writeFwdRules(p4info_helper, r1, "10.0.1.20", 32, "10.0.1.20", 1, "00:04:00:00:00:02")
+        writeFwdRules(p4info_helper, r1, "10.0.1.100", 32, "10.0.1.100", 1, "00:04:00:00:00:03")
+        writeFwdRules(p4info_helper, r1, "10.0.2.0", 24, "10.0.2.252", 3, "00:aa:bb:00:00:19")
+        writeFwdRules(p4info_helper, r1, "10.0.3.0", 24, "10.0.3.252", 2, "00:aa:bb:00:00:17")
+
+        
         #r2 fwd
-        writeFwdRules(p4info_helper, r2, "10.0.2.10", 32, "10.0.2.10", 1, "00:aa:00:00:02:01")
-        writeFwdRules(p4info_helper, r2, "10.0.2.20", 32, "10.0.2.20", 1, "00:aa:00:00:02:02")
-        writeFwdRules(p4info_helper, r2, "10.0.1.0", 24, "10.0.4.3", 2, "00:bb:bb:00:01:02")      
+        writeFwdRules(p4info_helper, r2, "10.0.2.10", 32, "10.0.2.10", 1, "00:04:00:00:00:04")
+        writeFwdRules(p4info_helper, r2, "10.0.2.20", 32, "10.0.2.20", 1, "00:04:00:00:00:05")
+        writeFwdRules(p4info_helper, r2, "10.0.2.100", 32, "10.0.2.100", 1, "00:04:00:00:00:06")
+        writeFwdRules(p4info_helper, r2, "10.0.1.0", 24, "10.0.1.253", 2, "00:aa:bb:00:00:18")
+        writeFwdRules(p4info_helper, r2, "10.0.3.0", 24, "10.0.3.253", 3, "00:aa:bb:00:00:21")  
+
+        #r3 fwd
+        writeFwdRules(p4info_helper, r3, "10.0.3.10", 32, "10.0.3.10", 1, "00:04:00:00:00:07")
+        writeFwdRules(p4info_helper, r3, "10.0.3.20", 32, "10.0.3.20", 1, "00:04:00:00:00:08")
+        writeFwdRules(p4info_helper, r3, "10.0.3.100", 32, "10.0.3.100", 1, "00:04:00:00:00:09")
+        writeFwdRules(p4info_helper, r3, "10.0.1.0", 24, "10.0.1.252", 2, "00:aa:bb:00:00:16")
+        writeFwdRules(p4info_helper, r3, "10.0.2.0", 24, "10.0.2.253", 3, "00:aa:bb:00:00:20")  
 
         readTableRules(p4info_helper, r1)
         readTableRules(p4info_helper, r2)
+        readTableRules(p4info_helper, r3)
 
 
         while True:
@@ -156,20 +207,24 @@ def main(p4info_file_path, bmv2_file_path):
             print('\n----- Reading counters -----')
             printCounter(p4info_helper, r1, "MyIngress.c", 1)
             printCounter(p4info_helper, r2, "MyIngress.c", 1)
+            printCounter(p4info_helper, r3, "MyIngress.c", 1)
 
     except KeyboardInterrupt:
         print(" Shutting down.")
     except grpc.RpcError as e:
         printGrpcError(e)
 
+
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='P4Runtime Controller')
     parser.add_argument('--p4info', help='p4info proto in text format from p4c',
                         type=str, action="store", required=False,
-                        default='build/s-router.p4.p4info.txt')
+                        default='build/router_tp3.p4.p4info.txt')
     parser.add_argument('--bmv2-json', help='BMv2 JSON file from p4c',
                         type=str, action="store", required=False,
-                        default='build/s-router.json')
+                        default='build/router_tp3.json')
     args = parser.parse_args()
 
     if not os.path.exists(args.p4info):

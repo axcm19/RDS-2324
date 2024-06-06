@@ -1,10 +1,10 @@
 
-[2024-05-16 16:51:59.965] /p4.v1.P4Runtime/SetForwardingPipelineConfig
+[2024-06-06 15:46:38.700] /p4.v1.P4Runtime/SetForwardingPipelineConfig
 ---
-Message too long (23966 bytes)! Skipping log...
+Message too long (42318 bytes)! Skipping log...
 ---
 
-[2024-05-16 16:51:59.977] /p4.v1.P4Runtime/Write
+[2024-06-06 15:46:38.745] /p4.v1.P4Runtime/Write
 ---
 device_id: 2
 election_id {
@@ -26,7 +26,7 @@ updates {
           action_id: 32831061
           params {
             param_id: 1
-            value: "\000\273\273\000\002\001"
+            value: "\000\252\273\000\000\023"
           }
         }
       }
@@ -35,7 +35,7 @@ updates {
 }
 ---
 
-[2024-05-16 16:51:59.978] /p4.v1.P4Runtime/Write
+[2024-06-06 15:46:38.747] /p4.v1.P4Runtime/Write
 ---
 device_id: 2
 election_id {
@@ -57,7 +57,7 @@ updates {
           action_id: 32831061
           params {
             param_id: 1
-            value: "\000\273\273\000\002\002"
+            value: "\000\252\273\000\000\031"
           }
         }
       }
@@ -66,7 +66,38 @@ updates {
 }
 ---
 
-[2024-05-16 16:51:59.988] /p4.v1.P4Runtime/Write
+[2024-06-06 15:46:38.748] /p4.v1.P4Runtime/Write
+---
+device_id: 2
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 49286192
+      match {
+        field_id: 1
+        exact {
+          value: "\000\003"
+        }
+      }
+      action {
+        action {
+          action_id: 32831061
+          params {
+            param_id: 1
+            value: "\000\252\273\000\000 "
+          }
+        }
+      }
+    }
+  }
+}
+---
+
+[2024-06-06 15:46:38.766] /p4.v1.P4Runtime/Write
 ---
 device_id: 2
 election_id {
@@ -102,7 +133,7 @@ updates {
 }
 ---
 
-[2024-05-16 16:51:59.989] /p4.v1.P4Runtime/Write
+[2024-06-06 15:46:38.770] /p4.v1.P4Runtime/Write
 ---
 device_id: 2
 election_id {
@@ -124,7 +155,7 @@ updates {
           action_id: 32579445
           params {
             param_id: 1
-            value: "\000\252\000\000\002\001"
+            value: "\000\004\000\000\000\004"
           }
         }
       }
@@ -133,7 +164,7 @@ updates {
 }
 ---
 
-[2024-05-16 16:51:59.990] /p4.v1.P4Runtime/Write
+[2024-06-06 15:46:38.772] /p4.v1.P4Runtime/Write
 ---
 device_id: 2
 election_id {
@@ -169,7 +200,7 @@ updates {
 }
 ---
 
-[2024-05-16 16:51:59.992] /p4.v1.P4Runtime/Write
+[2024-06-06 15:46:38.773] /p4.v1.P4Runtime/Write
 ---
 device_id: 2
 election_id {
@@ -191,7 +222,7 @@ updates {
           action_id: 32579445
           params {
             param_id: 1
-            value: "\000\252\000\000\002\002"
+            value: "\000\004\000\000\000\005"
           }
         }
       }
@@ -200,7 +231,74 @@ updates {
 }
 ---
 
-[2024-05-16 16:51:59.993] /p4.v1.P4Runtime/Write
+[2024-06-06 15:46:38.774] /p4.v1.P4Runtime/Write
+---
+device_id: 2
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 37375156
+      match {
+        field_id: 1
+        lpm {
+          value: "\n\000\002d"
+          prefix_len: 32
+        }
+      }
+      action {
+        action {
+          action_id: 33032974
+          params {
+            param_id: 1
+            value: "\n\000\002d"
+          }
+          params {
+            param_id: 2
+            value: "\000\001"
+          }
+        }
+      }
+    }
+  }
+}
+---
+
+[2024-06-06 15:46:38.776] /p4.v1.P4Runtime/Write
+---
+device_id: 2
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47919242
+      match {
+        field_id: 1
+        exact {
+          value: "\n\000\002d"
+        }
+      }
+      action {
+        action {
+          action_id: 32579445
+          params {
+            param_id: 1
+            value: "\000\004\000\000\000\006"
+          }
+        }
+      }
+    }
+  }
+}
+---
+
+[2024-06-06 15:46:38.777] /p4.v1.P4Runtime/Write
 ---
 device_id: 2
 election_id {
@@ -223,7 +321,7 @@ updates {
           action_id: 33032974
           params {
             param_id: 1
-            value: "\n\000\004\003"
+            value: "\n\000\001\375"
           }
           params {
             param_id: 2
@@ -236,7 +334,7 @@ updates {
 }
 ---
 
-[2024-05-16 16:51:59.996] /p4.v1.P4Runtime/Write
+[2024-06-06 15:46:38.778] /p4.v1.P4Runtime/Write
 ---
 device_id: 2
 election_id {
@@ -250,7 +348,7 @@ updates {
       match {
         field_id: 1
         exact {
-          value: "\n\000\004\003"
+          value: "\n\000\001\375"
         }
       }
       action {
@@ -258,7 +356,7 @@ updates {
           action_id: 32579445
           params {
             param_id: 1
-            value: "\000\273\273\000\001\002"
+            value: "\000\252\273\000\000\030"
           }
         }
       }
@@ -267,24 +365,78 @@ updates {
 }
 ---
 
-[2024-05-16 16:51:59.999] /p4.v1.P4Runtime/Read
+[2024-06-06 15:46:38.780] /p4.v1.P4Runtime/Write
 ---
 device_id: 2
-entities {
-  table_entry {
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 37375156
+      match {
+        field_id: 1
+        lpm {
+          value: "\n\000\003\000"
+          prefix_len: 24
+        }
+      }
+      action {
+        action {
+          action_id: 33032974
+          params {
+            param_id: 1
+            value: "\n\000\003\375"
+          }
+          params {
+            param_id: 2
+            value: "\000\003"
+          }
+        }
+      }
+    }
   }
 }
 ---
 
-[2024-05-16 16:52:10.014] /p4.v1.P4Runtime/Read
+[2024-06-06 15:46:38.781] /p4.v1.P4Runtime/Write
+---
+device_id: 2
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47919242
+      match {
+        field_id: 1
+        exact {
+          value: "\n\000\003\375"
+        }
+      }
+      action {
+        action {
+          action_id: 32579445
+          params {
+            param_id: 1
+            value: "\000\252\273\000\000!"
+          }
+        }
+      }
+    }
+  }
+}
+---
+
+[2024-06-06 15:46:38.798] /p4.v1.P4Runtime/Read
 ---
 device_id: 2
 entities {
-  counter_entry {
-    counter_id: 315478639
-    index {
-      index: 1
-    }
+  table_entry {
   }
 }
 ---

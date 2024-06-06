@@ -25,6 +25,8 @@ typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
 
+counter(8192, CounterType.packets) c;
+
 /**
 * Here we define the headers of the protocols
 * that we want to work with.
@@ -206,6 +208,7 @@ control MyIngress(inout headers hdr,
         meta.next_hop_ipv4 = nxt_hop;
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+        c.count((bit<32>) 1);
     }
 
 
