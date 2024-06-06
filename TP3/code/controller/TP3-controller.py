@@ -22,15 +22,12 @@ port_mac_mapping_r3 = {1: "00:aa:bb:00:00:15", 2: "00:aa:bb:00:00:17", 3: "00:aa
 
 
 
-
 def printGrpcError(e):
     print("gRPC Error:", e.details(), end=' ')
     status_code = e.code()
     print("(%s)" % status_code.name, end=' ')
     traceback = sys.exc_info()[2]
     print("[%s:%d]" % (traceback.tb_frame.f_code.co_filename, traceback.tb_lineno))
-
-
 
 
 
@@ -62,8 +59,6 @@ def readTableRules(p4info_helper, sw):
 
 
 
-
-
 def writeSrcMac(p4info_helper, sw, port_mac_mapping):
     for port, mac in port_mac_mapping.items():
         table_entry = p4info_helper.buildTableEntry(
@@ -77,9 +72,6 @@ def writeSrcMac(p4info_helper, sw, port_mac_mapping):
             })
         sw.WriteTableEntry(table_entry)
     print("Installed MAC SRC rules on %s" % sw.name)
-
-
-
 
 
 
@@ -107,8 +99,25 @@ def writeFwdRules(p4info_helper, sw, dstAddr, mask, nextHop, port, dstMac):
         })
     sw.WriteTableEntry(table_entry)
     print("Installed FWD rule on %s" % sw.name)
+ 
 
 
+def writeFirewallRules(p4info_helper, sw, srcAddr, maskSrc, dstAddr, protocol, listRange):
+    table_entry = p4info_helper.buildTableEntry(
+        table_name="MyIngress.firewall",
+        match_fields={
+            "hdr.ipv4.srcAddr": (srcAddr, maskSrc),
+            "hdr.ipv4.dstAddr": dstAddr,
+            "hdr.ipv4.protocol": protocol,
+            "hdr.tcp.dstPort": listRange
+        },
+        action_name="MyIngress.drop",
+        action_params = {}
+    )
+        
+    sw.WriteTableEntry(table_entry)
+
+    print("Installed Firewall rule on %s" % sw.name)
 
 
 
@@ -120,8 +129,6 @@ def printCounter(p4info_helper, sw, counter_name, index):
                 sw.name, counter_name, index,
                 counter.data.packet_count, counter.data.byte_count
             ))
-
-
 
 
 
@@ -170,10 +177,14 @@ def main(p4info_file_path, bmv2_file_path):
                                        bmv2_json_file_path=bmv2_file_path)
         print("Installed P4 Program using SetForwardingPipelineConfig on r3")
 
+
+        # -------------------- SRC MAC RULES --------------------
         writeSrcMac(p4info_helper, r1, port_mac_mapping_r1)
         writeSrcMac(p4info_helper, r2, port_mac_mapping_r2)
         writeSrcMac(p4info_helper, r3, port_mac_mapping_r3)
 
+
+        # -------------------- FORWARDING RULES --------------------
         # writeFwdRules(p4info_helper, nome_router, dstAddr, mask, nextHop, port, dstMac)
         #r1 fwd
         writeFwdRules(p4info_helper, r1, "10.0.1.10", 32, "10.0.1.10", 1, "00:04:00:00:00:01")
@@ -196,6 +207,58 @@ def main(p4info_file_path, bmv2_file_path):
         writeFwdRules(p4info_helper, r3, "10.0.3.100", 32, "10.0.3.100", 1, "00:04:00:00:00:09")
         writeFwdRules(p4info_helper, r3, "10.0.1.0", 24, "10.0.1.252", 2, "00:aa:bb:00:00:16")
         writeFwdRules(p4info_helper, r3, "10.0.2.0", 24, "10.0.2.253", 3, "00:aa:bb:00:00:20")  
+
+
+        # -------------------- FIREWALL RULES --------------------
+        # writeFirewallRules(p4info_helper, sw, srcAddr, maskSrc, dstAddr, protocol, rangeMin, rangeMax):
+        """
+        table_add firewall drop 10.0.2.0/24 10.0.1.10 0x06 0->65535 => 1
+        table_add firewall drop 10.0.2.0/24 10.0.1.20 0x06 0->24 => 1
+        table_add firewall drop 10.0.2.0/24 10.0.1.20 0x06 26->65535 => 1
+        table_add firewall drop 10.0.3.0/24 10.0.1.10 0x06 0->442 => 1
+        table_add firewall drop 10.0.3.0/24 10.0.1.10 0x06 444->65535 => 1
+        table_add firewall drop 10.0.3.0/24 10.0.1.20 0x06 0->65535 => 1
+        """
+        #r1 firewall
+        writeFirewallRules(p4info_helper, r1, "10.0.2.0", 24, "10.0.1.10", 6, [0, 65535])
+        writeFirewallRules(p4info_helper, r1, "10.0.2.0", 24, "10.0.1.20", 6, [0, 24])
+        writeFirewallRules(p4info_helper, r1, "10.0.2.0", 24, "10.0.1.20", 6, [26, 65535])
+        writeFirewallRules(p4info_helper, r1, "10.0.3.0", 24, "10.0.1.10", 6, [0, 442])
+        writeFirewallRules(p4info_helper, r1, "10.0.3.0", 24, "10.0.1.10", 6, [444, 65535])
+        writeFirewallRules(p4info_helper, r1, "10.0.3.0", 24, "10.0.1.20", 6, [0, 65535])
+ 
+        '''
+        table_add firewall drop 10.0.1.0/24 10.0.2.10 0x06 0->79 => 1
+        table_add firewall drop 10.0.1.0/24 10.0.2.10 0x06 81->65535 => 1
+        table_add firewall drop 10.0.1.0/24 10.0.2.20 0x06 0->65535 => 1
+        table_add firewall drop 10.0.3.0/24 10.0.2.10 0x06 0->65535 => 1 
+        table_add firewall drop 10.0.3.0/24 10.0.2.20 0x06 0->21 => 1 
+        table_add firewall drop 10.0.3.0/24 10.0.2.20 0x06 23->65535 => 1
+        '''
+        #r2 firewall
+        writeFirewallRules(p4info_helper, r2, "10.0.1.0", 24, "10.0.2.10", 6, [0, 79])
+        writeFirewallRules(p4info_helper, r2, "10.0.1.0", 24, "10.0.2.10", 6, [81, 24])
+        writeFirewallRules(p4info_helper, r2, "10.0.1.0", 24, "10.0.2.20", 6, [0, 65535])
+        writeFirewallRules(p4info_helper, r2, "10.0.3.0", 24, "10.0.2.10", 6, [0, 65535])
+        writeFirewallRules(p4info_helper, r2, "10.0.3.0", 24, "10.0.2.20", 6, [444, 21])
+        writeFirewallRules(p4info_helper, r2, "10.0.3.0", 24, "10.0.2.20", 6, [23, 65535])
+
+        '''
+        table_add firewall drop 10.0.1.0/24 10.0.3.10 0x06 0->8079 => 1
+        table_add firewall drop 10.0.1.0/24 10.0.3.10 0x06 8081->65535 => 1
+        table_add firewall drop 10.0.1.0/24 10.0.3.20 0x06 0->65535 => 1
+        table_add firewall drop 10.0.2.0/24 10.0.3.10 0x06 0->65535 => 1
+        table_add firewall drop 10.0.2.0/24 10.0.3.20 0x06 0->442 => 1
+        table_add firewall drop 10.0.2.0/24 10.0.3.20 0x06 444->65535 => 1
+        '''
+        #r3 firewall
+        writeFirewallRules(p4info_helper, r3, "10.0.1.0", 24, "10.0.3.10", 6, [0, 8079])
+        writeFirewallRules(p4info_helper, r3, "10.0.1.0", 24, "10.0.3.10", 6, [8081, 65535])
+        writeFirewallRules(p4info_helper, r3, "10.0.1.0", 24, "10.0.3.20", 6, [0, 65535])
+        writeFirewallRules(p4info_helper, r3, "10.0.2.0", 24, "10.0.3.10", 6, [0, 65535])
+        writeFirewallRules(p4info_helper, r3, "10.0.2.0", 24, "10.0.3.20", 6, [0, 442])
+        writeFirewallRules(p4info_helper, r3, "10.0.2.0", 24, "10.0.3.20", 6, [444, 65535])
+
 
         readTableRules(p4info_helper, r1)
         readTableRules(p4info_helper, r2)
