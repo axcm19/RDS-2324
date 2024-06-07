@@ -296,12 +296,12 @@
   "meter_arrays" : [],
   "counter_arrays" : [
     {
-      "name" : "c",
+      "name" : "MyIngress.c",
       "id" : 0,
       "source_info" : {
         "filename" : "p4/router_tp3.p4",
-        "line" : 28,
-        "column" : 35,
+        "line" : 196,
+        "column" : 39,
         "source_fragment" : "c"
       },
       "size" : 8192,
@@ -372,7 +372,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "p4/router_tp3.p4",
-        "line" : 171,
+        "line" : 169,
         "column" : 4,
         "source_fragment" : "verify_checksum( ..."
       },
@@ -660,7 +660,7 @@
           "parameters" : [
             {
               "type" : "counter_array",
-              "value" : "c"
+              "value" : "MyIngress.c"
             },
             {
               "type" : "hexstr",
@@ -927,7 +927,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "p4/router_tp3.p4",
-        "line" : 194,
+        "line" : 192,
         "column" : 8,
         "source_fragment" : "MyIngress"
       },
@@ -1267,7 +1267,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "p4/router_tp3.p4",
-        "line" : 171,
+        "line" : 169,
         "column" : 4,
         "source_fragment" : "verify_checksum( ..."
       },

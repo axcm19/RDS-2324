@@ -228,8 +228,8 @@ actions {
 }
 counters {
   preamble {
-    id: 314203481
-    name: "c"
+    id: 315478639
+    name: "MyIngress.c"
     alias: "c"
   }
   spec {

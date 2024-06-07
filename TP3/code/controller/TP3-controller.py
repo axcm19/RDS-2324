@@ -101,7 +101,6 @@ def writeFwdRules(p4info_helper, sw, dstAddr, mask, nextHop, port, dstMac):
     print("Installed FWD rule on %s" % sw.name)
  
 
-
 def writeFirewallRules(p4info_helper, sw, srcAddr, maskSrc, dstAddr, protocol, listRange):
     table_entry = p4info_helper.buildTableEntry(
         table_name="MyIngress.firewall",
@@ -112,13 +111,48 @@ def writeFirewallRules(p4info_helper, sw, srcAddr, maskSrc, dstAddr, protocol, l
             "hdr.tcp.dstPort": listRange
         },
         action_name="MyIngress.drop",
-        action_params = {}
+        action_params = {},
+        priority = 1
     )
-        
+
     sw.WriteTableEntry(table_entry)
 
     print("Installed Firewall rule on %s" % sw.name)
 
+
+def writeFirewall_2_Rules(p4info_helper, sw, srcAddr, maskSrc, list_dstAddr, listProtocol):   
+    table_entry = p4info_helper.buildTableEntry(
+        table_name="MyIngress.firewall_2",
+        match_fields={
+            "hdr.ipv4.srcAddr": (srcAddr, maskSrc),
+            "hdr.ipv4.dstAddr": list_dstAddr,
+            "hdr.ipv4.protocol": listProtocol
+        },
+        action_name="MyIngress.drop",
+        action_params = {},
+        priority = 2
+    )
+    
+
+    sw.WriteTableEntry(table_entry)
+
+    print("Installed Firewall_2 rule on %s" % sw.name)
+
+
+def writeICMP_Rules(p4info_helper, sw, dstAddr, protocol):
+    table_entry = p4info_helper.buildTableEntry(
+        table_name="MyIngress.icmp_for_router",
+        match_fields={
+            "hdr.ipv4.dstAddr" : dstAddr, 
+            "hdr.ipv4.protocol" : protocol
+        },
+        action_name="MyIngress.respond_icmp",
+        action_params = {},
+    )
+
+    sw.WriteTableEntry(table_entry)
+
+    print("Installed Firewall_2 rule on %s" % sw.name)
 
 
 def printCounter(p4info_helper, sw, counter_name, index):
@@ -178,14 +212,15 @@ def main(p4info_file_path, bmv2_file_path):
         print("Installed P4 Program using SetForwardingPipelineConfig on r3")
 
 
+
         # -------------------- SRC MAC RULES --------------------
         writeSrcMac(p4info_helper, r1, port_mac_mapping_r1)
         writeSrcMac(p4info_helper, r2, port_mac_mapping_r2)
         writeSrcMac(p4info_helper, r3, port_mac_mapping_r3)
 
 
+
         # -------------------- FORWARDING RULES --------------------
-        # writeFwdRules(p4info_helper, nome_router, dstAddr, mask, nextHop, port, dstMac)
         #r1 fwd
         writeFwdRules(p4info_helper, r1, "10.0.1.10", 32, "10.0.1.10", 1, "00:04:00:00:00:01")
         writeFwdRules(p4info_helper, r1, "10.0.1.20", 32, "10.0.1.20", 1, "00:04:00:00:00:02")
@@ -210,54 +245,153 @@ def main(p4info_file_path, bmv2_file_path):
 
 
         # -------------------- FIREWALL RULES --------------------
-        # writeFirewallRules(p4info_helper, sw, srcAddr, maskSrc, dstAddr, protocol, rangeMin, rangeMax):
-        """
-        table_add firewall drop 10.0.2.0/24 10.0.1.10 0x06 0->65535 => 1
-        table_add firewall drop 10.0.2.0/24 10.0.1.20 0x06 0->24 => 1
-        table_add firewall drop 10.0.2.0/24 10.0.1.20 0x06 26->65535 => 1
-        table_add firewall drop 10.0.3.0/24 10.0.1.10 0x06 0->442 => 1
-        table_add firewall drop 10.0.3.0/24 10.0.1.10 0x06 444->65535 => 1
-        table_add firewall drop 10.0.3.0/24 10.0.1.20 0x06 0->65535 => 1
-        """
         #r1 firewall
-        writeFirewallRules(p4info_helper, r1, "10.0.2.0", 24, "10.0.1.10", 6, [0, 65535])
-        writeFirewallRules(p4info_helper, r1, "10.0.2.0", 24, "10.0.1.20", 6, [0, 24])
-        writeFirewallRules(p4info_helper, r1, "10.0.2.0", 24, "10.0.1.20", 6, [26, 65535])
-        writeFirewallRules(p4info_helper, r1, "10.0.3.0", 24, "10.0.1.10", 6, [0, 442])
-        writeFirewallRules(p4info_helper, r1, "10.0.3.0", 24, "10.0.1.10", 6, [444, 65535])
-        writeFirewallRules(p4info_helper, r1, "10.0.3.0", 24, "10.0.1.20", 6, [0, 65535])
+        ## nao permite range inteiro de uma só vez
+        writeFirewallRules(p4info_helper, r1, "10.0.2.0", 24, "10.0.1.10", 6, [0,50])
+        writeFirewallRules(p4info_helper, r1, "10.0.2.0", 24, "10.0.1.10", 6, [51,65535])
+        ##
+        writeFirewallRules(p4info_helper, r1, "10.0.2.0", 24, "10.0.1.20", 6, [0,24])
+        writeFirewallRules(p4info_helper, r1, "10.0.2.0", 24, "10.0.1.20", 6, [26,65535])
+        writeFirewallRules(p4info_helper, r1, "10.0.3.0", 24, "10.0.1.10", 6, [0,442])
+        writeFirewallRules(p4info_helper, r1, "10.0.3.0", 24, "10.0.1.10", 6, [444,65535])
+        ## nao permite range inteiro de uma só vez
+        writeFirewallRules(p4info_helper, r1, "10.0.3.0", 24, "10.0.1.20", 6, [0,50])
+        writeFirewallRules(p4info_helper, r1, "10.0.3.0", 24, "10.0.1.20", 6, [51,65535])
  
-        '''
-        table_add firewall drop 10.0.1.0/24 10.0.2.10 0x06 0->79 => 1
-        table_add firewall drop 10.0.1.0/24 10.0.2.10 0x06 81->65535 => 1
-        table_add firewall drop 10.0.1.0/24 10.0.2.20 0x06 0->65535 => 1
-        table_add firewall drop 10.0.3.0/24 10.0.2.10 0x06 0->65535 => 1 
-        table_add firewall drop 10.0.3.0/24 10.0.2.20 0x06 0->21 => 1 
-        table_add firewall drop 10.0.3.0/24 10.0.2.20 0x06 23->65535 => 1
-        '''
         #r2 firewall
-        writeFirewallRules(p4info_helper, r2, "10.0.1.0", 24, "10.0.2.10", 6, [0, 79])
-        writeFirewallRules(p4info_helper, r2, "10.0.1.0", 24, "10.0.2.10", 6, [81, 24])
-        writeFirewallRules(p4info_helper, r2, "10.0.1.0", 24, "10.0.2.20", 6, [0, 65535])
-        writeFirewallRules(p4info_helper, r2, "10.0.3.0", 24, "10.0.2.10", 6, [0, 65535])
-        writeFirewallRules(p4info_helper, r2, "10.0.3.0", 24, "10.0.2.20", 6, [444, 21])
-        writeFirewallRules(p4info_helper, r2, "10.0.3.0", 24, "10.0.2.20", 6, [23, 65535])
+        writeFirewallRules(p4info_helper, r2, "10.0.1.0", 24, "10.0.2.10", 6, [0,79])
+        writeFirewallRules(p4info_helper, r2, "10.0.1.0", 24, "10.0.2.10", 6, [81,65535])
+        ## nao permite range inteiro de uma só vez
+        writeFirewallRules(p4info_helper, r2, "10.0.1.0", 24, "10.0.2.20", 6, [0,50])       
+        writeFirewallRules(p4info_helper, r2, "10.0.1.0", 24, "10.0.2.20", 6, [51,65535])   
+        writeFirewallRules(p4info_helper, r2, "10.0.3.0", 24, "10.0.2.10", 6, [0,50])       
+        writeFirewallRules(p4info_helper, r2, "10.0.3.0", 24, "10.0.2.10", 6, [51,65535])
+        ##
+        writeFirewallRules(p4info_helper, r2, "10.0.3.0", 24, "10.0.2.20", 6, [0,21])
+        writeFirewallRules(p4info_helper, r2, "10.0.3.0", 24, "10.0.2.20", 6, [23,65535])
 
-        '''
-        table_add firewall drop 10.0.1.0/24 10.0.3.10 0x06 0->8079 => 1
-        table_add firewall drop 10.0.1.0/24 10.0.3.10 0x06 8081->65535 => 1
-        table_add firewall drop 10.0.1.0/24 10.0.3.20 0x06 0->65535 => 1
-        table_add firewall drop 10.0.2.0/24 10.0.3.10 0x06 0->65535 => 1
-        table_add firewall drop 10.0.2.0/24 10.0.3.20 0x06 0->442 => 1
-        table_add firewall drop 10.0.2.0/24 10.0.3.20 0x06 444->65535 => 1
-        '''
         #r3 firewall
-        writeFirewallRules(p4info_helper, r3, "10.0.1.0", 24, "10.0.3.10", 6, [0, 8079])
-        writeFirewallRules(p4info_helper, r3, "10.0.1.0", 24, "10.0.3.10", 6, [8081, 65535])
-        writeFirewallRules(p4info_helper, r3, "10.0.1.0", 24, "10.0.3.20", 6, [0, 65535])
-        writeFirewallRules(p4info_helper, r3, "10.0.2.0", 24, "10.0.3.10", 6, [0, 65535])
-        writeFirewallRules(p4info_helper, r3, "10.0.2.0", 24, "10.0.3.20", 6, [0, 442])
-        writeFirewallRules(p4info_helper, r3, "10.0.2.0", 24, "10.0.3.20", 6, [444, 65535])
+        writeFirewallRules(p4info_helper, r3, "10.0.1.0", 24, "10.0.3.10", 6, [0,8079])
+        writeFirewallRules(p4info_helper, r3, "10.0.1.0", 24, "10.0.3.10", 6, [8081,65535])
+        ## nao permite range inteiro de uma só vez
+        writeFirewallRules(p4info_helper, r3, "10.0.1.0", 24, "10.0.3.20", 6, [0,50])
+        writeFirewallRules(p4info_helper, r3, "10.0.1.0", 24, "10.0.3.20", 6, [51,65535])
+        writeFirewallRules(p4info_helper, r3, "10.0.2.0", 24, "10.0.3.10", 6, [0,50])
+        writeFirewallRules(p4info_helper, r3, "10.0.2.0", 24, "10.0.3.10", 6, [51,65535])
+        ##
+        writeFirewallRules(p4info_helper, r3, "10.0.2.0", 24, "10.0.3.20", 6, [0,442])
+        writeFirewallRules(p4info_helper, r3, "10.0.2.0", 24, "10.0.3.20", 6, [444,65535])
+
+
+
+
+        # -------------------- FIREWALL_2 RULES --------------------
+        # r1
+        # NoAction
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.254", 32, ["10.0.1.100", "10.0.1.100"], [0, 0])    # 10.0.X.254
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.254", 32, ["10.0.1.100", "10.0.1.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.254", 32, ["10.0.1.100", "10.0.1.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.254", 32, ["10.0.1.100", "10.0.1.100"], [0, 0])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.254", 32, ["10.0.1.100", "10.0.1.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.254", 32, ["10.0.1.100", "10.0.1.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.252", 32, ["10.0.1.100", "10.0.1.100"], [0, 0])    # 10.0.X.252
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.252", 32, ["10.0.1.100", "10.0.1.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.252", 32, ["10.0.1.100", "10.0.1.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.252", 32, ["10.0.1.100", "10.0.1.100"], [0, 0])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.252", 32, ["10.0.1.100", "10.0.1.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.252", 32, ["10.0.1.100", "10.0.1.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.253", 32, ["10.0.1.100", "10.0.1.100"], [0, 0])    # 10.0.X.253
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.253", 32, ["10.0.1.100", "10.0.1.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.253", 32, ["10.0.1.100", "10.0.1.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.253", 32, ["10.0.1.100", "10.0.1.100"], [0, 0])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.253", 32, ["10.0.1.100", "10.0.1.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.253", 32, ["10.0.1.100", "10.0.1.100"], [7, 255])
+        # drop
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.0", 24, ["10.0.1.0", "10.0.1.99"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.0", 24, ["10.0.1.0", "10.0.1.99"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.0", 24, ["10.0.1.0", "10.0.1.99"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.0", 24, ["10.0.1.0", "10.0.1.99"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.0", 24, ["10.0.1.101", "10.0.1.251"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.0", 24, ["10.0.1.101", "10.0.1.251"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.0", 24, ["10.0.1.101", "10.0.1.251"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.0", 24, ["10.0.1.101", "10.0.1.251"], [7, 255])
+
+        # r2
+        # NoAction
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.1.254", 32, ["10.0.2.100", "10.0.2.100"], [0, 0])    # 10.0.X.254
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.1.254", 32, ["10.0.2.100", "10.0.2.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.1.254", 32, ["10.0.2.100", "10.0.2.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.254", 32, ["10.0.2.100", "10.0.2.100"], [0, 0])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.254", 32, ["10.0.2.100", "10.0.2.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.254", 32, ["10.0.2.100", "10.0.2.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.1.253", 32, ["10.0.2.100", "10.0.2.100"], [0, 0])    # 10.0.X.253
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.1.253", 32, ["10.0.2.100", "10.0.2.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.1.253", 32, ["10.0.2.100", "10.0.2.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.253", 32, ["10.0.2.100", "10.0.2.100"], [0, 0])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.253", 32, ["10.0.2.100", "10.0.2.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.253", 32, ["10.0.2.100", "10.0.2.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.1.252", 32, ["10.0.2.100", "10.0.2.100"], [0, 0])    # 10.0.X.252
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.1.252", 32, ["10.0.2.100", "10.0.2.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.1.252", 32, ["10.0.2.100", "10.0.2.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.252", 32, ["10.0.2.100", "10.0.2.100"], [0, 0])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.252", 32, ["10.0.2.100", "10.0.2.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.252", 32, ["10.0.2.100", "10.0.2.100"], [7, 255])
+        # drop
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.1.0", 24, ["10.0.2.0", "10.0.2.99"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.1.0", 24, ["10.0.2.0", "10.0.2.99"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.0", 24, ["10.0.2.0", "10.0.2.99"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.0", 24, ["10.0.2.0", "10.0.2.99"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.1.0", 24, ["10.0.2.101", "10.0.2.251"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.1.0", 24, ["10.0.2.101", "10.0.2.251"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.0", 24, ["10.0.2.101", "10.0.2.251"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.0", 24, ["10.0.2.101", "10.0.2.251"], [7, 255])
+
+        
+        # r3
+        # NoAction
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.1.254", 32, ["10.0.3.100", "10.0.3.100"], [0, 0])    # 10.0.X.254
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.1.254", 32, ["10.0.3.100", "10.0.3.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.1.254", 32, ["10.0.3.100", "10.0.3.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.254", 32, ["10.0.3.100", "10.0.3.100"], [0, 0])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.254", 32, ["10.0.3.100", "10.0.3.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.254", 32, ["10.0.3.100", "10.0.3.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.1.253", 32, ["10.0.3.100", "10.0.3.100"], [0, 0])    # 10.0.X.253
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.1.253", 32, ["10.0.3.100", "10.0.3.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.1.253", 32, ["10.0.3.100", "10.0.3.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.253", 32, ["10.0.3.100", "10.0.3.100"], [0, 0])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.253", 32, ["10.0.3.100", "10.0.3.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.253", 32, ["10.0.3.100", "10.0.3.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.1.252", 32, ["10.0.3.100", "10.0.3.100"], [0, 0])    # 10.0.X.252
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.1.252", 32, ["10.0.3.100", "10.0.3.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.1.252", 32, ["10.0.3.100", "10.0.3.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.252", 32, ["10.0.3.100", "10.0.3.100"], [0, 0])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.252", 32, ["10.0.3.100", "10.0.3.100"], [2, 5])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.252", 32, ["10.0.3.100", "10.0.3.100"], [7, 255])
+        # drop
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.1.0", 24, ["10.0.3.0", "10.0.3.99"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.1.0", 24, ["10.0.3.0", "10.0.3.99"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.0", 24, ["10.0.3.0", "10.0.3.99"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.0", 24, ["10.0.3.0", "10.0.3.99"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.1.0", 24, ["10.0.3.101", "10.0.3.251"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.1.0", 24, ["10.0.3.101", "10.0.3.251"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.0", 24, ["10.0.3.101", "10.0.3.251"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.0", 24, ["10.0.3.101", "10.0.3.251"], [7, 255])
+
+        # -------------------- ICMP RULES --------------------
+        # r1
+        writeICMP_Rules(p4info_helper, r1, "10.0.1.254", 1)
+        writeICMP_Rules(p4info_helper, r1, "10.0.1.252", 1)
+        writeICMP_Rules(p4info_helper, r1, "10.0.1.253", 1)
+        
+        # r2
+        writeICMP_Rules(p4info_helper, r2, "10.0.2.254", 1)
+        writeICMP_Rules(p4info_helper, r2, "10.0.2.252", 1)
+        writeICMP_Rules(p4info_helper, r2, "10.0.2.253", 1)
+ 
+        # r3
+        writeICMP_Rules(p4info_helper, r3, "10.0.3.254", 1)
+        writeICMP_Rules(p4info_helper, r3, "10.0.3.252", 1)
+        writeICMP_Rules(p4info_helper, r3, "10.0.3.253", 1)             
 
 
         readTableRules(p4info_helper, r1)

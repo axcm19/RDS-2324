@@ -25,8 +25,6 @@ typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
 
-counter(8192, CounterType.packets) c;
-
 /**
 * Here we define the headers of the protocols
 * that we want to work with.
@@ -194,6 +192,8 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
+
+    counter(8192, CounterType.packets) c;
 
     action drop() {
         mark_to_drop(standard_metadata);
