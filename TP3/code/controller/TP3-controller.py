@@ -152,7 +152,7 @@ def writeICMP_Rules(p4info_helper, sw, dstAddr, protocol):
 
     sw.WriteTableEntry(table_entry)
 
-    print("Installed Firewall_2 rule on %s" % sw.name)
+    print("Installed ICMP rule on %s" % sw.name)
 
 
 def printCounter(p4info_helper, sw, counter_name, index):
@@ -306,6 +306,10 @@ def main(p4info_file_path, bmv2_file_path):
         writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.253", 32, ["10.0.1.100", "10.0.1.100"], [0, 0])
         writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.253", 32, ["10.0.1.100", "10.0.1.100"], [2, 5])
         writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.253", 32, ["10.0.1.100", "10.0.1.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.100", 32, ["10.0.1.100", "10.0.1.100"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.100", 32, ["10.0.1.100", "10.0.1.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.100", 32, ["10.0.1.100", "10.0.1.100"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.100", 32, ["10.0.1.100", "10.0.1.100"], [7, 255])
         # drop
         writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.0", 24, ["10.0.1.0", "10.0.1.99"], [0, 5])
         writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.0", 24, ["10.0.1.0", "10.0.1.99"], [7, 255])
@@ -336,6 +340,10 @@ def main(p4info_file_path, bmv2_file_path):
         writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.252", 32, ["10.0.2.100", "10.0.2.100"], [0, 0])
         writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.252", 32, ["10.0.2.100", "10.0.2.100"], [2, 5])
         writeFirewall_2_Rules(p4info_helper, r2, "10.0.3.252", 32, ["10.0.2.100", "10.0.2.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.1.100", 32, ["10.0.2.100", "10.0.2.100"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.1.100", 32, ["10.0.2.100", "10.0.2.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.100", 32, ["10.0.2.100", "10.0.2.100"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.3.100", 32, ["10.0.2.100", "10.0.2.100"], [7, 255])
         # drop
         writeFirewall_2_Rules(p4info_helper, r2, "10.0.1.0", 24, ["10.0.2.0", "10.0.2.99"], [0, 5])
         writeFirewall_2_Rules(p4info_helper, r2, "10.0.1.0", 24, ["10.0.2.0", "10.0.2.99"], [7, 255])
@@ -367,6 +375,10 @@ def main(p4info_file_path, bmv2_file_path):
         writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.252", 32, ["10.0.3.100", "10.0.3.100"], [0, 0])
         writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.252", 32, ["10.0.3.100", "10.0.3.100"], [2, 5])
         writeFirewall_2_Rules(p4info_helper, r3, "10.0.2.252", 32, ["10.0.3.100", "10.0.3.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.1.100", 32, ["10.0.3.100", "10.0.3.100"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.1.100", 32, ["10.0.3.100", "10.0.3.100"], [7, 255])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.100", 32, ["10.0.3.100", "10.0.3.100"], [0, 5])
+        writeFirewall_2_Rules(p4info_helper, r1, "10.0.2.100", 32, ["10.0.3.100", "10.0.3.100"], [7, 255])
         # drop
         writeFirewall_2_Rules(p4info_helper, r3, "10.0.1.0", 24, ["10.0.3.0", "10.0.3.99"], [0, 5])
         writeFirewall_2_Rules(p4info_helper, r3, "10.0.1.0", 24, ["10.0.3.0", "10.0.3.99"], [7, 255])
